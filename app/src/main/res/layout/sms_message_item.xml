@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="message"
+            type="com.sp.smshelper.model.SmsMessage" />
+
+        <variable
+            name="smsMessagesListener"
+            type="com.sp.smshelper.listeners.IListener.ISmsMessageFragment" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/sms_message_item_height"
+        android:onClick="@{() -> smsMessagesListener.onSmsMessageItemClick(message.getMessageId())}"
+        android:padding="@dimen/default_margin">
+
+        <TextView
+            android:id="@+id/messageType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`Type: ` + message.type.name()}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/sms_item_top_margin"
+            android:text="@{`Address: ` + message.address}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/messageType" />
+
+        <TextView
+            android:id="@+id/messageStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`Status: ` + message.status.name()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/body"
+            android:layout_width="@dimen/zero_margin"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/sms_item_top_margin"
+            android:text="@{message.body}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/date" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/sms_item_top_margin"
+            android:text="@{message.date.toString()}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/address" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/divider_height"
+            android:background="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

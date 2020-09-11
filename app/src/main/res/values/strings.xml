@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">SMSHelper</string>
+    <string name="conversations">Conversations</string>
+
+    <string name="permission_granted">Permission granted!</string>
+    <string name="permission_denied">Permission denied!</string>
+    <string name="sample_text">Sample text</string>
+    <string name="sms_message">SMS messages</string>
+    <string name="message_details">Message details</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="enter_phone_number">Enter phone number</string>
+    <string name="enter_message">Enter message</string>
+    <string name="send">Send</string>
+    <string name="select_phone_number">Please select source phone number</string>
+    <string name="receive_sms">Receive SMS</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

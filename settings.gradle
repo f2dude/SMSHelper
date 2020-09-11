@@ -1,0 +1,2 @@
+rootProject.name='SMSHelper'
+include ':app'

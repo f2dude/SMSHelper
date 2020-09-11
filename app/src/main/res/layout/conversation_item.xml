@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="conversation"
+            type="com.sp.smshelper.model.Conversation" />
+
+        <variable
+            name="conversationsListener"
+            type="com.sp.smshelper.listeners.IListener.IConversationsFragment" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/conversation_item_size"
+        android:onClick="@{() -> conversationsListener.onConversationItemClick(conversation)}"
+        android:padding="@dimen/default_margin">
+
+        <TextView
+            android:id="@+id/snippet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="@integer/snippet_max_lines"
+            android:text="@{conversation.snippet}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/threadId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{`Thread id: ` + conversation.threadId}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/divider_height"
+            android:background="@color/colorPrimary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/conversation_address_top_margin"
+            android:text="@{`Address: ` + conversation.address}"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/snippet" />
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/conversation_date_top_margin"
+            android:text="@{conversation.date.toString()}"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/snippet" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

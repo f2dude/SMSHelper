@@ -1,0 +1,191 @@
+package com.sp.smshelper.conversation;
+
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.provider.Telephony;
+import android.text.TextUtils;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import com.sp.smshelper.messages.SmsMessagesFragment;
+import com.sp.smshelper.model.Conversation;
+import com.sp.smshelper.model.SmsMessage;
+import com.sp.smshelper.repository.ConversationsObserver;
+import com.sp.smshelper.repository.ConversationsRepository;
+
+import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
+public class ConversationsViewModel extends ViewModel {
+
+    private static final String TAG = ConversationsViewModel.class.getSimpleName();
+
+    private MutableLiveData<List<Conversation>> mMutableConversationData = new MutableLiveData<>();
+    private MutableLiveData<List<SmsMessage>> mMutableSmsMessageData = new MutableLiveData<>();
+    private MutableLiveData<String> mMutableSmsMessageDetails = new MutableLiveData<>();
+
+    private ConversationsObserver mConversationsObserver;
+    private Context mContext;
+    private Fragment mActiveFragment;
+
+    public ConversationsViewModel() {
+        mConversationsObserver = new ConversationsObserver(mSmsHandler);
+    }
+
+    public void setContext(Context context) {
+        this.mContext = context;
+    }
+
+    protected Disposable getAllConversations() {
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.getAllConversations(mContext);
+        })
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(resultObject ->
+            //set data
+            mMutableConversationData.setValue(resultObject),
+            error -> Log.e(TAG, "Error in readConversationsFromDb(): " + error));
+    }
+
+    protected LiveData<List<Conversation>> watchConversations() {
+        return mMutableConversationData;
+    }
+
+    public Disposable getSmsMessagesByThreadId(String threadId) {
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.getSmsMessagesByThreadId(mContext, threadId);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(resultObject ->
+                    //set data
+                    mMutableSmsMessageData.setValue(resultObject),
+                    error -> Log.e(TAG, "Error in getSmsMessagesByThreadId(): " + error));
+    }
+
+    public LiveData<List<SmsMessage>> watchSmsMessages() {
+        return mMutableSmsMessageData;
+    }
+
+    public Disposable getMessageDetailsById(String messageId) {
+        return Observable.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.getSmsMessageByMessageId(mContext, messageId);
+        }).flatMap((Function<SmsMessage, ObservableSource<String>>) smsMessage -> Observable.just(generateMessageData(smsMessage)))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(resultObject ->
+                        //Set data
+                        mMutableSmsMessageDetails.setValue(resultObject),
+                        error -> Log.e(TAG, "Error in getSmsMessagesByThreadId(): " + error));
+    }
+
+    private String generateMessageData(SmsMessage messageDetails) {
+        String newLine = "\n";
+        StringBuffer sb = new StringBuffer();
+        sb.append("Thread id: " + messageDetails.getThreadId());
+        sb.append(newLine);
+        sb.append("Message id: " + messageDetails.getMessageId());
+        sb.append(newLine);
+        sb.append("Address: " + messageDetails.getAddress());
+        sb.append(newLine);
+        sb.append("Body: " + messageDetails.getBody());
+        sb.append(newLine);
+        sb.append("Date: " + messageDetails.getDate());
+        sb.append(newLine);
+        sb.append("Message type: " + messageDetails.getType().name());
+        sb.append(newLine);
+        sb.append("Protocol: " + messageDetails.getProtocol());
+        sb.append(newLine);
+        sb.append("Read status: " + messageDetails.getRead());
+        sb.append(newLine);
+        sb.append("Message status: " + messageDetails.getStatus());
+        sb.append(newLine);
+        sb.append("Reply path present: " + messageDetails.isReplyPathPresent());
+        sb.append(newLine);
+        sb.append("Subject: " + messageDetails.getSubject());
+        sb.append(newLine);
+        sb.append("Creator: " + messageDetails.getCreator());
+        sb.append(newLine);
+        sb.append("Date sent: " + messageDetails.getDateSent());
+        sb.append(newLine);
+        sb.append("Error code: " + messageDetails.getErrorCode());
+        sb.append(newLine);
+        sb.append("Locked: " + messageDetails.getLocked());
+        sb.append(newLine);
+        sb.append("Person: " + messageDetails.getPerson());
+        sb.append(newLine);
+        sb.append("Subscription id: " + messageDetails.getSubscriptionId());
+        sb.append(newLine);
+        sb.append("Is seen: " + messageDetails.isSeen());
+
+        return sb.toString();
+    }
+
+    public LiveData<String> watchSmsMessageDetails() {
+        return mMutableSmsMessageDetails;
+    }
+
+    /**
+     * Registers for conversation table
+     * @param fragment Current active fragment
+     */
+    public void registerSmsMessages(Fragment fragment) {
+        mContext.getContentResolver().registerContentObserver(Telephony.Sms.CONTENT_URI,
+                true,
+                mConversationsObserver);
+        this.mActiveFragment = fragment;
+    }
+
+    /**
+     * Unregister from conversations table
+     */
+    public void unregisterSmsMessages() {
+        mContext.getContentResolver().unregisterContentObserver(mConversationsObserver);
+        this.mActiveFragment = null;
+    }
+
+    /**
+     * Receives updates from {@link ConversationsObserver}
+     */
+    private Handler mSmsHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.getData() != null) {
+                boolean needChange = msg.getData().getBoolean(ConversationsObserver.BUNDLE_ARGS_CHANGE_STATUS);
+                if (needChange) {
+                    String hostUri = msg.getData().getString(ConversationsObserver.BUNDLE_ARGS_URI);
+                    if (!TextUtils.isEmpty(hostUri) && hostUri.equals(Telephony.Sms.Conversations.CONTENT_URI.getHost())) {
+                        if (mActiveFragment instanceof ConversationsFragment) {
+                            getAllConversations();
+                        } else if (mActiveFragment instanceof SmsMessagesFragment &&
+                                !TextUtils.isEmpty(((SmsMessagesFragment) mActiveFragment).getThreadId())) {
+                            getSmsMessagesByThreadId(((SmsMessagesFragment) mActiveFragment).getThreadId());
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+}
