@@ -47,7 +47,7 @@ public class SendSmsViewModel extends ViewModel {
      *
      * @return Disposable object
      */
-    protected Disposable getDeviceNumbersList() {
+     Disposable getDeviceNumbersList() {
         Log.d(TAG, "getDeviceNumbersList()");
         return Single.fromCallable(() -> {
             List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
@@ -72,23 +72,25 @@ public class SendSmsViewModel extends ViewModel {
      *
      * @return Live data subscription list
      */
-    protected LiveData<List<SubscriptionInfo>> watchSimCardsList() {
+    LiveData<List<SubscriptionInfo>> watchSimCardsList() {
         return mMutableSimCardsList;
     }
 
     /**
      * Creates an observer for message sent
+     *
      * @return Live data
      */
-    protected LiveData<String> watchMessageSentStatus() {
+    LiveData<String> watchMessageSentStatus() {
         return mMutableMessageSent;
     }
 
     /**
      * Creates an observer for message delivered
+     *
      * @return Live data
      */
-    protected LiveData<String> watchMessageDeliveredStatus() {
+    LiveData<String> watchMessageDeliveredStatus() {
         return mMutableMessageDelivered;
     }
 
@@ -106,16 +108,16 @@ public class SendSmsViewModel extends ViewModel {
      *
      * @param mSubscriptionId Id
      */
-    public void setSubscriptionId(int mSubscriptionId) {
+    void setSubscriptionId(int mSubscriptionId) {
         this.mSubscriptionId = mSubscriptionId;
     }
 
-    protected void registerReceiver() {
+    void registerReceiver() {
         mContext.registerReceiver(sentBR, new IntentFilter(SENT));
         mContext.registerReceiver(deliveredBr, new IntentFilter(DELIVERED));
     }
 
-    protected void unRegisterReceiver() {
+    void unRegisterReceiver() {
         mContext.unregisterReceiver(sentBR);
         mContext.unregisterReceiver(deliveredBr);
     }
@@ -126,7 +128,7 @@ public class SendSmsViewModel extends ViewModel {
      * @param remoteNumber Remote party number
      * @param message      Message to send
      */
-    protected Disposable sendSMS(String remoteNumber, String message) {
+    Disposable sendSMS(String remoteNumber, String message) {
 
         return Single.fromCallable(() -> {
             boolean status = false;
@@ -136,7 +138,17 @@ public class SendSmsViewModel extends ViewModel {
                 PendingIntent deliveredPi = PendingIntent.getBroadcast(mContext, 0, new Intent(DELIVERED), 0);
 
                 SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(mSubscriptionId);
-                smsManager.sendTextMessage(remoteNumber, null, message, sentPi, deliveredPi);
+                ArrayList<String> parts = smsManager.divideMessage(message);
+
+                ArrayList<PendingIntent> sentIntents = new ArrayList<>();
+                ArrayList<PendingIntent> deliveryIntents = new ArrayList<>();
+
+                for (int i = 0; i < parts.size(); i++) {
+                    sentIntents.add(sentPi);
+                    deliveryIntents.add(deliveredPi);
+                }
+
+                smsManager.sendMultipartTextMessage(remoteNumber, null, parts, sentIntents, deliveryIntents);
             }
             return status;
         })
@@ -172,6 +184,8 @@ public class SendSmsViewModel extends ViewModel {
                 case SmsManager.RESULT_ERROR_RADIO_OFF:
                     status = "RESULT_ERROR_RADIO_OFF";
                     break;
+                default:
+                    break;
             }
             mMutableMessageSent.setValue(context.getString(R.string.message_sent));
             Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
@@ -189,6 +203,8 @@ public class SendSmsViewModel extends ViewModel {
                     break;
                 case Activity.RESULT_CANCELED:
                     status = "NOT DELIVERED";
+                    break;
+                default:
                     break;
             }
             mMutableMessageDelivered.setValue(context.getString(R.string.message_delivered));
