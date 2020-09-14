@@ -13,7 +13,7 @@
     <string name="send">Send</string>
     <string name="select_phone_number">Please select source phone number</string>
     <string name="receive_sms">Receive SMS</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="message_status">Message status</string>
+    <string name="message_sent">Message sent successfully !</string>
+    <string name="message_delivered">SMS delivered !</string>
 </resources>

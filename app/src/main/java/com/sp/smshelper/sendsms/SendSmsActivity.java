@@ -52,6 +52,8 @@ public class SendSmsActivity extends BaseActivity {
         addToCompositeDisposable(mViewModel.getDeviceNumbersList());
         //Observe on data
         mViewModel.watchSimCardsList().observe(this, numbersAdapter::setData);
+        mViewModel.watchMessageSentStatus().observe(this, s -> mBinding.messageSent.setText(s));
+        mViewModel.watchMessageDeliveredStatus().observe(this, s -> mBinding.messageDelivered.setText(s));
     }
 
     /**
@@ -71,9 +73,9 @@ public class SendSmsActivity extends BaseActivity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy()");
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop()");
         mViewModel.unRegisterReceiver();
     }
 }

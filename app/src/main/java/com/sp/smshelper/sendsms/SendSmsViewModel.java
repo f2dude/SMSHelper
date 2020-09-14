@@ -32,12 +32,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class SendSmsViewModel extends ViewModel {
 
     private static final String TAG = SendSmsViewModel.class.getSimpleName();
-    private static final int SENT_REQUEST_CODE = 2001;
-    private static final int DELIVERED_REQUEST_CODE = 2002;
     private static final String SENT = "SMS_SENT";
     private static final String DELIVERED = "SMS_DELIVERED";
 
     private MutableLiveData<List<SubscriptionInfo>> mMutableSimCardsList = new MutableLiveData<>();
+    private MutableLiveData<String> mMutableMessageSent = new MutableLiveData<>();
+    private MutableLiveData<String> mMutableMessageDelivered = new MutableLiveData<>();
     private int mSubscriptionId = -1;
     private Context mContext;
 
@@ -70,10 +70,26 @@ public class SendSmsViewModel extends ViewModel {
     /**
      * Creates an observer for sim card list
      *
-     * @return
+     * @return Live data subscription list
      */
     protected LiveData<List<SubscriptionInfo>> watchSimCardsList() {
         return mMutableSimCardsList;
+    }
+
+    /**
+     * Creates an observer for message sent
+     * @return Live data
+     */
+    protected LiveData<String> watchMessageSentStatus() {
+        return mMutableMessageSent;
+    }
+
+    /**
+     * Creates an observer for message delivered
+     * @return Live data
+     */
+    protected LiveData<String> watchMessageDeliveredStatus() {
+        return mMutableMessageDelivered;
     }
 
     /**
@@ -96,12 +112,12 @@ public class SendSmsViewModel extends ViewModel {
 
     protected void registerReceiver() {
         mContext.registerReceiver(sentBR, new IntentFilter(SENT));
-//        mContext.registerReceiver(deliveredBr, new IntentFilter(DELIVERED));
+        mContext.registerReceiver(deliveredBr, new IntentFilter(DELIVERED));
     }
 
     protected void unRegisterReceiver() {
         mContext.unregisterReceiver(sentBR);
-//        mContext.unregisterReceiver(deliveredBr);
+        mContext.unregisterReceiver(deliveredBr);
     }
 
     /**
@@ -116,11 +132,11 @@ public class SendSmsViewModel extends ViewModel {
             boolean status = false;
             if (mSubscriptionId > -1) {
                 status = true;
-                PendingIntent sentPi = PendingIntent.getBroadcast(mContext, SENT_REQUEST_CODE, new Intent(SENT), 0);
-//                PendingIntent deliveredPi = PendingIntent.getBroadcast(mContext, DELIVERED_REQUEST_CODE, new Intent(DELIVERED), 0);
+                PendingIntent sentPi = PendingIntent.getBroadcast(mContext, 0, new Intent(SENT), 0);
+                PendingIntent deliveredPi = PendingIntent.getBroadcast(mContext, 0, new Intent(DELIVERED), 0);
 
                 SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(mSubscriptionId);
-                smsManager.sendTextMessage(remoteNumber, null, message, sentPi, null);
+                smsManager.sendTextMessage(remoteNumber, null, message, sentPi, deliveredPi);
             }
             return status;
         })
@@ -138,6 +154,7 @@ public class SendSmsViewModel extends ViewModel {
     private BroadcastReceiver sentBR = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "=====Sent broadcast receiver=====");
             String status = "NULL";
             switch (getResultCode()) {
                 case Activity.RESULT_OK:
@@ -156,23 +173,26 @@ public class SendSmsViewModel extends ViewModel {
                     status = "RESULT_ERROR_RADIO_OFF";
                     break;
             }
+            mMutableMessageSent.setValue(context.getString(R.string.message_sent));
             Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
         }
     };
 
-//    private BroadcastReceiver deliveredBr = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            String status = "NULL";
-//            switch (getResultCode()) {
-//                case Activity.RESULT_OK:
-//                    status = "DELIVERED";
-//                    break;
-//                case Activity.RESULT_CANCELED:
-//                    status = "NOT DELIVERED";
-//                    break;
-//            }
-//            Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
-//        }
-//    };
+    private BroadcastReceiver deliveredBr = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "=====Delivered broadcast receiver=====");
+            String status = "NULL";
+            switch (getResultCode()) {
+                case Activity.RESULT_OK:
+                    status = "DELIVERED";
+                    break;
+                case Activity.RESULT_CANCELED:
+                    status = "NOT DELIVERED";
+                    break;
+            }
+            mMutableMessageDelivered.setValue(context.getString(R.string.message_delivered));
+            Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
+        }
+    };
 }

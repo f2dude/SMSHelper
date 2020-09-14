@@ -22,7 +22,7 @@ public class MainActivity extends BaseActivity implements IMainActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int READ_SMS_REQUEST_CODE = 1001;
-    private static final int SEND_SMS_PHONE_STATE_REQUEST_CODE = 1002;
+    private static final int SEND_Receive_SMS_PHONE_STATE_REQUEST_CODE = 1002;
 
     private MainActivityViewModel mViewModel;
     private ActivityMainBinding mBinding;
@@ -59,11 +59,12 @@ public class MainActivity extends BaseActivity implements IMainActivity {
     @Override
     public void sendSms() {
         String[] permissions = {
-                android.Manifest.permission.SEND_SMS,
-                Manifest.permission.READ_PHONE_STATE
+                Manifest.permission.SEND_SMS,
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.RECEIVE_SMS
         };
 
-        if (hasPermissions(SEND_SMS_PHONE_STATE_REQUEST_CODE, permissions)) {
+        if (hasPermissions(SEND_Receive_SMS_PHONE_STATE_REQUEST_CODE, permissions)) {
             Log.d(TAG, "sendSms()");
             //start activity
             startActivity(new Intent(this, SendSmsActivity.class));
@@ -109,7 +110,7 @@ public class MainActivity extends BaseActivity implements IMainActivity {
                 Toast.makeText(this, R.string.permission_granted, Toast.LENGTH_SHORT).show();
                 if (requestCode == READ_SMS_REQUEST_CODE) {
                     readSms();
-                } else if (requestCode == SEND_SMS_PHONE_STATE_REQUEST_CODE) {
+                } else if (requestCode == SEND_Receive_SMS_PHONE_STATE_REQUEST_CODE) {
                     sendSms();
                 }
             } else {

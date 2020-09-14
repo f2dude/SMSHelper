@@ -72,5 +72,36 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/message" />
+
+        <TextView
+            android:id="@+id/messageStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/message_status"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="@dimen/message_status_text_size"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/send" />
+
+        <TextView
+            android:id="@+id/messageSent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/message_sent_top_margin"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/message_sent_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/messageStatus" />
+
+        <TextView
+            android:id="@+id/messageDelivered"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/message_delivered_top_margin"
+            android:textColor="@color/colorAccent"
+            android:textSize="@dimen/message_sent_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/messageSent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
