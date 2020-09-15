@@ -63,7 +63,8 @@ public class ConversationsRepository {
         String[] projection = {"DISTINCT " + Telephony.Sms.THREAD_ID,
                 Telephony.Sms.BODY,
                 Telephony.Sms.DATE,
-                Telephony.Sms.ADDRESS};
+                Telephony.Sms.ADDRESS,
+                Telephony.Sms.READ};
         String selection = Telephony.Sms.THREAD_ID + " IS NOT NULL) GROUP BY (" + Telephony.Sms.THREAD_ID;
         ContentResolver contentResolver = context.getContentResolver();
         Cursor cursor = contentResolver.query(Telephony.Sms.CONTENT_URI,
@@ -84,6 +85,16 @@ public class ConversationsRepository {
                     SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault());
                     conversation.setDate(sdf.format(Long.parseLong(smsDate)));
                     conversation.setAddress(getValue(cursor, Telephony.Sms.ADDRESS));
+                    boolean read = false;
+                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.READ))) {
+                        case 0:
+                            read = false;
+                            break;
+                        case 1:
+                            read = true;
+                            break;
+                    }
+                    conversation.setRead(read);
 
                     conversationList.add(conversation);
                 }

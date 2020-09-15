@@ -47,7 +47,7 @@ public class SendSmsViewModel extends ViewModel {
      *
      * @return Disposable object
      */
-     Disposable getDeviceNumbersList() {
+    Disposable getDeviceNumbersList() {
         Log.d(TAG, "getDeviceNumbersList()");
         return Single.fromCallable(() -> {
             List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
@@ -143,10 +143,8 @@ public class SendSmsViewModel extends ViewModel {
                 ArrayList<PendingIntent> sentIntents = new ArrayList<>();
                 ArrayList<PendingIntent> deliveryIntents = new ArrayList<>();
 
-                for (int i = 0; i < parts.size(); i++) {
-                    sentIntents.add(sentPi);
-                    deliveryIntents.add(deliveredPi);
-                }
+                sentIntents.add(sentPi);
+                deliveryIntents.add(deliveredPi);
 
                 smsManager.sendMultipartTextMessage(remoteNumber, null, parts, sentIntents, deliveryIntents);
             }

@@ -56,12 +56,12 @@ public class ConversationsViewModel extends ViewModel {
             ConversationsRepository conversationsRepository = new ConversationsRepository();
             return conversationsRepository.getAllConversations(mContext);
         })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(resultObject ->
-            //set data
-            mMutableConversationData.setValue(resultObject),
-            error -> Log.e(TAG, "Error in readConversationsFromDb(): " + error));
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(resultObject ->
+                                //set data
+                                mMutableConversationData.setValue(resultObject),
+                        error -> Log.e(TAG, "Error in readConversationsFromDb(): " + error));
     }
 
     protected LiveData<List<Conversation>> watchConversations() {
@@ -77,9 +77,9 @@ public class ConversationsViewModel extends ViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(resultObject ->
-                    //set data
-                    mMutableSmsMessageData.setValue(resultObject),
-                    error -> Log.e(TAG, "Error in getSmsMessagesByThreadId(): " + error));
+                                //set data
+                                mMutableSmsMessageData.setValue(resultObject),
+                        error -> Log.e(TAG, "Error in getSmsMessagesByThreadId(): " + error));
     }
 
     public LiveData<List<SmsMessage>> watchSmsMessages() {
@@ -94,49 +94,49 @@ public class ConversationsViewModel extends ViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(resultObject ->
-                        //Set data
-                        mMutableSmsMessageDetails.setValue(resultObject),
+                                //Set data
+                                mMutableSmsMessageDetails.setValue(resultObject),
                         error -> Log.e(TAG, "Error in getSmsMessagesByThreadId(): " + error));
     }
 
     private String generateMessageData(SmsMessage messageDetails) {
         String newLine = "\n";
-        StringBuffer sb = new StringBuffer();
-        sb.append("Thread id: " + messageDetails.getThreadId());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Thread id: ").append(messageDetails.getThreadId());
         sb.append(newLine);
-        sb.append("Message id: " + messageDetails.getMessageId());
+        sb.append("Message id: ").append(messageDetails.getMessageId());
         sb.append(newLine);
-        sb.append("Address: " + messageDetails.getAddress());
+        sb.append("Address: ").append(messageDetails.getAddress());
         sb.append(newLine);
-        sb.append("Body: " + messageDetails.getBody());
+        sb.append("Body: ").append(messageDetails.getBody());
         sb.append(newLine);
-        sb.append("Date: " + messageDetails.getDate());
+        sb.append("Date: ").append(messageDetails.getDate());
         sb.append(newLine);
-        sb.append("Message type: " + messageDetails.getType().name());
+        sb.append("Message type: ").append(messageDetails.getType().name());
         sb.append(newLine);
-        sb.append("Protocol: " + messageDetails.getProtocol());
+        sb.append("Protocol: ").append(messageDetails.getProtocol());
         sb.append(newLine);
-        sb.append("Read status: " + messageDetails.getRead());
+        sb.append("Read status: ").append(messageDetails.getRead());
         sb.append(newLine);
-        sb.append("Message status: " + messageDetails.getStatus());
+        sb.append("Message status: ").append(messageDetails.getStatus());
         sb.append(newLine);
-        sb.append("Reply path present: " + messageDetails.isReplyPathPresent());
+        sb.append("Reply path present: ").append(messageDetails.isReplyPathPresent());
         sb.append(newLine);
-        sb.append("Subject: " + messageDetails.getSubject());
+        sb.append("Subject: ").append(messageDetails.getSubject());
         sb.append(newLine);
-        sb.append("Creator: " + messageDetails.getCreator());
+        sb.append("Creator: ").append(messageDetails.getCreator());
         sb.append(newLine);
-        sb.append("Date sent: " + messageDetails.getDateSent());
+        sb.append("Date sent: ").append(messageDetails.getDateSent());
         sb.append(newLine);
-        sb.append("Error code: " + messageDetails.getErrorCode());
+        sb.append("Error code: ").append(messageDetails.getErrorCode());
         sb.append(newLine);
-        sb.append("Locked: " + messageDetails.getLocked());
+        sb.append("Locked: ").append(messageDetails.getLocked());
         sb.append(newLine);
-        sb.append("Person: " + messageDetails.getPerson());
+        sb.append("Person: ").append(messageDetails.getPerson());
         sb.append(newLine);
-        sb.append("Subscription id: " + messageDetails.getSubscriptionId());
+        sb.append("Subscription id: ").append(messageDetails.getSubscriptionId());
         sb.append(newLine);
-        sb.append("Is seen: " + messageDetails.isSeen());
+        sb.append("Is seen: ").append(messageDetails.isSeen());
 
         return sb.toString();
     }
@@ -147,6 +147,7 @@ public class ConversationsViewModel extends ViewModel {
 
     /**
      * Registers for conversation table
+     *
      * @param fragment Current active fragment
      */
     public void registerSmsMessages(Fragment fragment) {

@@ -6,6 +6,7 @@ public class Conversation {
     private String snippet;
     private String date;
     private String address;
+    private boolean read;
 
     public String getThreadId() {
         return threadId;
@@ -37,5 +38,13 @@ public class Conversation {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 }
