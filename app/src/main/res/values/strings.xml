@@ -16,4 +16,6 @@
     <string name="message_status">Message status</string>
     <string name="message_sent">Message sent successfully !</string>
     <string name="message_delivered">SMS delivered !</string>
+    <string name="default_app">App is set to default</string>
+    <string name="cancelled">Cancelled</string>
 </resources>
