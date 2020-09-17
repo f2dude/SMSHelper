@@ -1,40 +1,72 @@
 package com.sp.smshelper.main;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.sp.smshelper.BuildConfig;
 import com.sp.smshelper.R;
 import com.sp.smshelper.conversation.ConversationsActivity;
 import com.sp.smshelper.databinding.ActivityMainBinding;
 import com.sp.smshelper.sendsms.SendSmsActivity;
 
+import io.reactivex.rxjava3.disposables.Disposable;
+
 public class MainActivity extends BaseActivity implements IMainActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-    private static final int READ_SMS_REQUEST_CODE = 1001;
-    private static final int SEND_Receive_SMS_PHONE_STATE_REQUEST_CODE = 1002;
+    private static final int SMS_PERMISSIONS_REQUEST_CODE = 2001;
+    private static final int REQUEST_DEFAULT_APP = 5001;
 
     private MainActivityViewModel mViewModel;
-    private ActivityMainBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mBinding.setIMainActivity(this);
+        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding.setIMainActivity(this);
 
         mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        checkPermissions();
+    }
+
+    /**
+     * Checks application permissions
+     */
+    private void checkPermissions() {
+        String[] permissions = {
+                Manifest.permission.READ_SMS,
+                Manifest.permission.SEND_SMS,
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.RECEIVE_MMS,
+                Manifest.permission.RECEIVE_WAP_PUSH
+        };
+
+        Disposable disposable = mViewModel.hasPermissions(this, SMS_PERMISSIONS_REQUEST_CODE, permissions)
+                .subscribe(aBoolean -> {
+                    if (aBoolean) {
+                        requestDefaultApp();
+                    }
+                });
+        addToCompositeDisposable(disposable);
     }
 
     /**
@@ -42,15 +74,9 @@ public class MainActivity extends BaseActivity implements IMainActivity {
      */
     @Override
     public void readSms() {
-        String[] permissions = {
-                Manifest.permission.READ_SMS
-        };
-
-        if (hasPermissions(READ_SMS_REQUEST_CODE, permissions)) {
-            Log.d(TAG, "readSms()");
-            //start activity
-            startActivity(new Intent(this, ConversationsActivity.class));
-        }
+        Log.d(TAG, "readSms()");
+        //start activity
+        startActivity(new Intent(this, ConversationsActivity.class));
     }
 
     /**
@@ -58,41 +84,31 @@ public class MainActivity extends BaseActivity implements IMainActivity {
      */
     @Override
     public void sendSms() {
-        String[] permissions = {
-                Manifest.permission.SEND_SMS,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.RECEIVE_SMS
-        };
-
-        if (hasPermissions(SEND_Receive_SMS_PHONE_STATE_REQUEST_CODE, permissions)) {
-            Log.d(TAG, "sendSms()");
-            //start activity
-            startActivity(new Intent(this, SendSmsActivity.class));
-        }
+        Log.d(TAG, "sendSms()");
+        //start activity
+        startActivity(new Intent(this, SendSmsActivity.class));
     }
 
     /**
-     * Checks whether the permissions are approved
-     * @param requestCode Request code
-     * @param permissions Permission type
-     * @return
+     * Requests for default app
      */
-    public boolean hasPermissions(int requestCode, String... permissions) {
-        if (null != permissions) {
-            for (String permission : permissions) {
-                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, permissions, requestCode);
-                    return false;
-                }
-            }
-        }
-        return true;
+    private void requestDefaultApp() {
+        Disposable disposable = mViewModel.checkDefaultApp(this)
+                .subscribe(aBoolean -> {
+                    if (!aBoolean) {
+                        Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, BuildConfig.APPLICATION_ID);
+                        startActivityForResult(intent, REQUEST_DEFAULT_APP);
+                    }
+                });
+        addToCompositeDisposable(disposable);
     }
 
     /**
      * Permission dialog approval/denial callback
-     * @param requestCode Request code
-     * @param permissions Permissions
+     *
+     * @param requestCode  Request code
+     * @param permissions  Permissions
      * @param grantResults Results
      */
     @Override
@@ -108,13 +124,22 @@ public class MainActivity extends BaseActivity implements IMainActivity {
             }
             if (isGranted) {
                 Toast.makeText(this, R.string.permission_granted, Toast.LENGTH_SHORT).show();
-                if (requestCode == READ_SMS_REQUEST_CODE) {
-                    readSms();
-                } else if (requestCode == SEND_Receive_SMS_PHONE_STATE_REQUEST_CODE) {
-                    sendSms();
-                }
+                requestDefaultApp();
             } else {
                 Toast.makeText(this, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_DEFAULT_APP) {
+            if (resultCode == Activity.RESULT_OK) {
+                Toast.makeText(this, getString(R.string.default_app), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, getString(R.string.cancelled), Toast.LENGTH_SHORT).show();
             }
         }
     }
