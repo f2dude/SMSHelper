@@ -64,6 +64,7 @@ public class SmsMessagesFragment extends BaseFragment implements IListener.ISmsM
             setupUi();
             mThreadId = getArguments().getString(BUNDLE_ARGS_THREAD_ID);
             if (!TextUtils.isEmpty(mThreadId)) {
+                updateSmsMessages();
                 readSmsMessages();
             }
         }
@@ -77,6 +78,10 @@ public class SmsMessagesFragment extends BaseFragment implements IListener.ISmsM
 
         mAdapter = new SmsMessagesAdapter(this);
         recyclerView.setAdapter(mAdapter);
+    }
+
+    private void updateSmsMessages() {
+        addToCompositeDisposable(mViewModel.markAllMessagesAsRead(mThreadId));
     }
 
     private void readSmsMessages() {

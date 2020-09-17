@@ -1,6 +1,7 @@
 package com.sp.smshelper.repository;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.Telephony;
@@ -57,7 +58,6 @@ public class ConversationsRepository {
         }
         return conversationList;
     }*/
-
     public List<Conversation> getAllConversations(Context context) {
         Log.d(TAG, "getAllConversations()");
         String[] projection = {"DISTINCT " + Telephony.Sms.THREAD_ID,
@@ -325,7 +325,70 @@ public class ConversationsRepository {
         return smsMessage;
     }
 
+    /**
+     * Gets value from column using cursor
+     *
+     * @param cursor     Cursor object
+     * @param columnName Name of column
+     * @return The actual value
+     */
     private String getValue(Cursor cursor, String columnName) {
         return cursor.getString(cursor.getColumnIndexOrThrow(columnName));
+    }
+
+    /**
+     * Marks all messages as read using thread id
+     * Message of type INBOX and whose READ status is 0 are marked as read
+     *
+     * @param context  Activity context
+     * @param threadId Thread id
+     */
+    public int markAllMessagesAsReadUsingThreadId(Context context, String threadId) {
+        Log.d(TAG, "markMessagesAsReadUsingThreadId()");
+        int rowsUpdated = 0;
+        try {
+            String where = Telephony.Sms.THREAD_ID + " = ? AND "
+                    + Telephony.Sms.TYPE + " = ? AND "
+                    + Telephony.Sms.READ + " = ?";
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Sms.READ, 1);
+
+            rowsUpdated = context.getContentResolver().update(Telephony.Sms.CONTENT_URI,
+                    contentValues,
+                    where,
+                    new String[]{threadId, String.valueOf(Telephony.Sms.MESSAGE_TYPE_INBOX), "0"});
+
+        } catch (Exception e) {
+            Log.e(TAG, "markMessagesAsReadUsingThreadId: " + e);
+        }
+        return rowsUpdated;
+    }
+
+    /**
+     * Marks a message as read
+     *
+     * @param context   Activity context
+     * @param messageId Message id
+     * @return Should return 1 as single row is updated
+     */
+    public int markMessageAsRead(Context context, String messageId) {
+        Log.d(TAG, "markMessageAsRead()");
+        int rowsUpdated = 0;
+        try {
+            String where = Telephony.Sms._ID + " = ? AND "
+                    + Telephony.Sms.TYPE + " = ? AND "
+                    + Telephony.Sms.READ + " = ?";
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Sms.READ, 1);
+
+            rowsUpdated = context.getContentResolver().update(Telephony.Sms.CONTENT_URI,
+                    contentValues,
+                    where,
+                    new String[]{messageId, String.valueOf(Telephony.Sms.MESSAGE_TYPE_INBOX), "0"});
+
+        } catch (Exception e) {
+            Log.e(TAG, "markMessageAsRead: " + e);
+        }
+        return rowsUpdated;
     }
 }

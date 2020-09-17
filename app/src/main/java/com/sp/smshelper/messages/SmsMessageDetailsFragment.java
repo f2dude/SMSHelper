@@ -2,6 +2,7 @@ package com.sp.smshelper.messages;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ public class SmsMessageDetailsFragment extends BaseFragment {
 
     private FragmentSmsDetailsBinding mBinding;
     private ConversationsViewModel mViewModel;
+    private String mMessageId;
 
     public static SmsMessageDetailsFragment newInstance(String messageId) {
 
@@ -46,25 +48,31 @@ public class SmsMessageDetailsFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mBinding.setFragment(this);
         //Set title
         getActivity().setTitle(R.string.message_details);
 
         mViewModel = ((ConversationsActivity) getActivity()).getViewModel();
 
         if (null != getArguments()) {
-            String messageId = getArguments().getString(BUNDLE_ARGS_MESSAGE_ID);
-            if (!TextUtils.isEmpty(messageId)) {
-                getSmsMessageDetails(messageId);
+            mMessageId = getArguments().getString(BUNDLE_ARGS_MESSAGE_ID);
+            if (!TextUtils.isEmpty(mMessageId)) {
+                getSmsMessageDetails();
             }
         }
     }
 
-    private void getSmsMessageDetails(String messageId) {
-        addToCompositeDisposable(mViewModel.getMessageDetailsById(messageId));
+    private void getSmsMessageDetails() {
+        addToCompositeDisposable(mViewModel.getMessageDetailsById(mMessageId));
         //Observe on data
         mViewModel.watchSmsMessageDetails().observe(getViewLifecycleOwner(),
                 messageDetails -> {
                     mBinding.setMessageDetails(messageDetails);
                 });
+    }
+
+    public void markAsRead() {
+        Log.d(TAG, "markAsRead()");
+        addToCompositeDisposable(mViewModel.markMessageAsRead(mMessageId));
     }
 }
