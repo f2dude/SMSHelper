@@ -86,13 +86,8 @@ public class ConversationsRepository {
                     conversation.setDate(sdf.format(Long.parseLong(smsDate)));
                     conversation.setAddress(getValue(cursor, Telephony.Sms.ADDRESS));
                     boolean read = false;
-                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.READ))) {
-                        case 0:
-                            read = false;
-                            break;
-                        case 1:
-                            read = true;
-                            break;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.READ)) == 1) {
+                        read = true;
                     }
                     conversation.setRead(read);
 
@@ -172,13 +167,8 @@ public class ConversationsRepository {
                     smsMessage.setType(type);
                     smsMessage.setProtocol(getValue(cursor, Telephony.Sms.PROTOCOL));
                     boolean read = false;
-                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.READ))) {
-                        case 0:
-                            read = false;
-                            break;
-                        case 1:
-                            read = true;
-                            break;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.READ)) == 1) {
+                        read = true;
                     }
                     smsMessage.setRead(read);
                     SmsMessage.MessageStatus status = null;
@@ -195,6 +185,8 @@ public class ConversationsRepository {
                         case Telephony.Sms.STATUS_PENDING:
                             status = SmsMessage.MessageStatus.PENDING;
                             break;
+                        default:
+                            break;
                     }
                     smsMessage.setStatus(status);
                     smsMessage.setReplyPathPresent(getValue(cursor, Telephony.Sms.REPLY_PATH_PRESENT));
@@ -204,13 +196,8 @@ public class ConversationsRepository {
                     smsMessage.setDateSent(dateFormat);
                     smsMessage.setErrorCode(getValue(cursor, Telephony.Sms.ERROR_CODE));
                     boolean locked = false;
-                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.LOCKED))) {
-                        case 0:
-                            locked = false;
-                            break;
-                        case 1:
-                            locked = true;
-                            break;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.LOCKED)) == 1) {
+                        locked = true;
                     }
                     smsMessage.setLocked(locked);
                     smsMessage.setPerson(getValue(cursor, Telephony.Sms.PERSON));
@@ -290,13 +277,8 @@ public class ConversationsRepository {
                     smsMessage.setType(type);
                     smsMessage.setProtocol(getValue(cursor, Telephony.Sms.PROTOCOL));
                     boolean read = false;
-                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.READ))) {
-                        case 0:
-                            read = false;
-                            break;
-                        case 1:
-                            read = true;
-                            break;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.READ)) == 1) {
+                        read = true;
                     }
                     smsMessage.setRead(read);
                     SmsMessage.MessageStatus status = null;
@@ -313,6 +295,8 @@ public class ConversationsRepository {
                         case Telephony.Sms.STATUS_PENDING:
                             status = SmsMessage.MessageStatus.PENDING;
                             break;
+                        default:
+                            break;
                     }
                     smsMessage.setStatus(status);
                     smsMessage.setReplyPathPresent(getValue(cursor, Telephony.Sms.REPLY_PATH_PRESENT));
@@ -322,19 +306,13 @@ public class ConversationsRepository {
                     smsMessage.setDateSent(dateFormat);
                     smsMessage.setErrorCode(getValue(cursor, Telephony.Sms.ERROR_CODE));
                     boolean locked = false;
-                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.LOCKED))) {
-                        case 0:
-                            locked = false;
-                            break;
-                        case 1:
-                            locked = true;
-                            break;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.LOCKED)) == 1) {
+                        locked = true;
                     }
                     smsMessage.setLocked(locked);
                     smsMessage.setPerson(getValue(cursor, Telephony.Sms.PERSON));
                     smsMessage.setSubscriptionId(getValue(cursor, Telephony.Sms.SUBSCRIPTION_ID));
                     smsMessage.setSeen(getValue(cursor, Telephony.Sms.SEEN));
-                    ;
                 }
             }
         } catch (Exception e) {
