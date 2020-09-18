@@ -8,7 +8,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -106,7 +105,6 @@ public class ConversationsFragment extends BaseFragment implements IListener.ICo
         super.onActionItemClick(itemId);
         switch(itemId) {
             case R.id.contextItemDelete:
-                Toast.makeText(getContext(), "Delete clicked", Toast.LENGTH_SHORT).show();
                 Disposable disposable = mAdapter.getSelectedThreadIds().subscribe(strings -> {
                     mViewModel.deleteSmsThreads(strings);
                     mAdapter.clearSelections();
