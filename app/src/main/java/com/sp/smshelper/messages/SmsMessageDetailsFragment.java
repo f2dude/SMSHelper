@@ -4,9 +4,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -48,7 +52,7 @@ public class SmsMessageDetailsFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mBinding.setFragment(this);
+        setHasOptionsMenu(true);
         //Set title
         getActivity().setTitle(R.string.message_details);
 
@@ -62,6 +66,24 @@ public class SmsMessageDetailsFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.sms_details, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mark_as_read:
+                markAsRead();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void getSmsMessageDetails() {
         addToCompositeDisposable(mViewModel.getMessageDetailsById(mMessageId));
         //Observe on data
@@ -71,7 +93,7 @@ public class SmsMessageDetailsFragment extends BaseFragment {
                 });
     }
 
-    public void markAsRead() {
+    private void markAsRead() {
         Log.d(TAG, "markAsRead()");
         addToCompositeDisposable(mViewModel.markMessageAsRead(mMessageId));
     }

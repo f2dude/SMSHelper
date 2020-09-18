@@ -4,9 +4,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -57,6 +61,7 @@ public class SmsMessagesFragment extends BaseFragment implements IListener.ISmsM
         super.onActivityCreated(savedInstanceState);
         //Set title
         getActivity().setTitle(R.string.sms_message);
+        setHasOptionsMenu(true);
 
         mViewModel = ((ConversationsActivity) getActivity()).getViewModel();
 
@@ -64,10 +69,27 @@ public class SmsMessagesFragment extends BaseFragment implements IListener.ISmsM
             setupUi();
             mThreadId = getArguments().getString(BUNDLE_ARGS_THREAD_ID);
             if (!TextUtils.isEmpty(mThreadId)) {
-                updateSmsMessages();
                 readSmsMessages();
             }
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.sms_messages, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mark_all_read:
+                markAllAsRead();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setupUi() {
@@ -80,7 +102,7 @@ public class SmsMessagesFragment extends BaseFragment implements IListener.ISmsM
         recyclerView.setAdapter(mAdapter);
     }
 
-    private void updateSmsMessages() {
+    private void markAllAsRead() {
         addToCompositeDisposable(mViewModel.markAllMessagesAsRead(mThreadId));
     }
 
