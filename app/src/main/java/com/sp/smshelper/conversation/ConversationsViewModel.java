@@ -175,6 +175,20 @@ public class ConversationsViewModel extends ViewModel {
                 });
     }
 
+    public Disposable deleteSmsThreads(List<String> threadIdsList) {
+        Log.d(TAG, "deleteSmsThreads()");
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.deleteSmsThreads(mContext, threadIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(results -> {
+
+                });
+    }
+
     /**
      * Registers for conversation table
      *

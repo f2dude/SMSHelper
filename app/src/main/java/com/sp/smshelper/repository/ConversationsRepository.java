@@ -1,5 +1,7 @@
 package com.sp.smshelper.repository;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ConversationsRepository {
 
@@ -390,5 +393,32 @@ public class ConversationsRepository {
             Log.e(TAG, "markMessageAsRead: " + e);
         }
         return rowsUpdated;
+    }
+
+    /**
+     * Deletes sms threads
+     * @param context Activity context
+     * @param threadIds List of thread ids
+     * @return Content provider results
+     */
+    public ContentProviderResult[] deleteSmsThreads(Context context, List<String> threadIds) {
+        Log.d(TAG, "deleteSmsThreads()");
+
+        ContentProviderResult[] results = null;
+        String selection = Telephony.Sms.THREAD_ID + " = ?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            for (String threadId : threadIds) {
+                String[] selectionArgs = new String[]{threadId};
+                ops.add(ContentProviderOperation.newDelete(Telephony.Sms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs)
+                        .withYieldAllowed(true)
+                        .build());
+            }
+            results = context.getContentResolver().applyBatch(Objects.requireNonNull(Telephony.Sms.CONTENT_URI.getAuthority()), ops);
+        } catch (Exception e) {
+            Log.e(TAG, "deleteSmsThreads(): " + e);
+        }
+        return results;
     }
 }
