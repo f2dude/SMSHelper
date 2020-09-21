@@ -1,5 +1,6 @@
 package com.sp.smshelper.conversation;
 
+import android.content.ContentProviderResult;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +23,12 @@ import com.sp.smshelper.listeners.IListener;
 import com.sp.smshelper.main.BaseFragment;
 import com.sp.smshelper.model.Conversation;
 
+import java.util.List;
+import java.util.Objects;
+
+import io.reactivex.rxjava3.core.SingleSource;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Function;
 
 public class ConversationsFragment extends BaseFragment implements IListener.IConversationsFragment {
 
@@ -78,7 +84,7 @@ public class ConversationsFragment extends BaseFragment implements IListener.ICo
         Log.d(TAG, "onConversationItemClick()");
 
         if (mActionMode == null) {
-            ((ConversationsActivity)getActivity()).startSmsFragment(conversation.getThreadId());
+            ((ConversationsActivity) Objects.requireNonNull(getActivity())).startSmsFragment(conversation.getThreadId());
         } else {//Multi selection
             mAdapter.toggleSelection(position);
             mActionMode.setTitle(String.valueOf(mAdapter.getSelectedItemsSize()));
@@ -103,15 +109,15 @@ public class ConversationsFragment extends BaseFragment implements IListener.ICo
     @Override
     protected boolean onActionItemClick(int itemId) {
         super.onActionItemClick(itemId);
-        switch(itemId) {
+        switch (itemId) {
             case R.id.contextItemDelete:
-                Disposable disposable = mAdapter.getSelectedThreadIds().subscribe(strings -> {
-                    mViewModel.deleteSmsThreads(strings);
-                    mAdapter.clearSelections();
-                });
+                Disposable disposable = mAdapter.getSelectedThreadIds()
+                        .flatMap((Function<List<String>, SingleSource<ContentProviderResult[]>>) strings -> mViewModel.deleteSmsThreads(strings))
+                        .subscribe(results -> Log.d(TAG, "Threads deleted: " + results.length));
                 addToCompositeDisposable(disposable);
                 return true;
             default:
+                mAdapter.clearSelections();
                 return false;
         }
     }

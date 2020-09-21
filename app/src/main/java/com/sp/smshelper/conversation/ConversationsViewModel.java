@@ -1,5 +1,6 @@
 package com.sp.smshelper.conversation;
 
+import android.content.ContentProviderResult;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -175,7 +176,7 @@ public class ConversationsViewModel extends ViewModel {
                 });
     }
 
-    public Disposable deleteSmsThreads(List<String> threadIdsList) {
+    Single<ContentProviderResult[]> deleteSmsThreads(List<String> threadIdsList) {
         Log.d(TAG, "deleteSmsThreads()");
 
         return Single.fromCallable(() -> {
@@ -183,10 +184,7 @@ public class ConversationsViewModel extends ViewModel {
             return conversationsRepository.deleteSmsThreads(mContext, threadIdsList);
         })
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(results -> {
-
-                });
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**

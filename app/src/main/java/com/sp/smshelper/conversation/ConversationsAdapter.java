@@ -81,6 +81,10 @@ public class ConversationsAdapter extends RecyclerView.Adapter<ConversationsAdap
         return mSelectedItems.size();
     }
 
+    /**
+     * Returns the selected threads
+     * @return List of selected threads
+     */
     Single<List<String>> getSelectedThreadIds() {
 
         return Single.fromCallable(() -> {
