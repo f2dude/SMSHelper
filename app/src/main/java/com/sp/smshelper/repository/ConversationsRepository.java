@@ -421,4 +421,31 @@ public class ConversationsRepository {
         }
         return results;
     }
+
+    /**
+     * Deletes sms messages
+     * @param context Activity context
+     * @param messageIds List of message ids
+     * @return Content provider results
+     */
+    public ContentProviderResult[] deleteSmsMessages(Context context, List<String> messageIds) {
+        Log.d(TAG, "deleteSmsThreads()");
+
+        ContentProviderResult[] results = null;
+        String selection = Telephony.Sms._ID + " = ?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            for (String messageId : messageIds) {
+                String[] selectionArgs = new String[]{messageId};
+                ops.add(ContentProviderOperation.newDelete(Telephony.Sms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs)
+                        .withYieldAllowed(true)
+                        .build());
+            }
+            results = context.getContentResolver().applyBatch(Objects.requireNonNull(Telephony.Sms.CONTENT_URI.getAuthority()), ops);
+        } catch (Exception e) {
+            Log.e(TAG, "deleteSmsMessages(): " + e);
+        }
+        return results;
+    }
 }

@@ -6,4 +6,9 @@
         android:id="@+id/mark_all_read"
         android:title="@string/mark_all_as_read"
         app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/select"
+        android:title="@string/select"
+        app:showAsAction="collapseActionView" />
 </menu>

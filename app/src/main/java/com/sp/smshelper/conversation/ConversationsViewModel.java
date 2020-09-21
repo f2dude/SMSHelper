@@ -176,12 +176,33 @@ public class ConversationsViewModel extends ViewModel {
                 });
     }
 
+    /**
+     * Deletes SMS threads
+     * @param threadIdsList Thread Ids list
+     * @return Operation results
+     */
     Single<ContentProviderResult[]> deleteSmsThreads(List<String> threadIdsList) {
         Log.d(TAG, "deleteSmsThreads()");
 
         return Single.fromCallable(() -> {
             ConversationsRepository conversationsRepository = new ConversationsRepository();
             return conversationsRepository.deleteSmsThreads(mContext, threadIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * Delets SMS messages
+     * @param messageIdsList Message Ids list
+     * @return Operation results
+     */
+    public Single<ContentProviderResult[]> deleteSmsMessages(List<String> messageIdsList) {
+        Log.d(TAG, "deleteSmsMessages()");
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.deleteSmsMessages(mContext, messageIdsList);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

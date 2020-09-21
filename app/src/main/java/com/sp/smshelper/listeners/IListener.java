@@ -9,6 +9,6 @@ public interface IListener {
     }
 
     interface ISmsMessageFragment {
-        void onSmsMessageItemClick(String messageId);
+        void onSmsMessageItemClick(String messageId, int position);
     }
 }
