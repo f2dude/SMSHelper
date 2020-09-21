@@ -61,6 +61,12 @@ public class ConversationsRepository {
         }
         return conversationList;
     }*/
+
+    /**
+     * Gets all conversations from SMS table
+     * @param context Activity context
+     * @return Conversation list
+     */
     public List<Conversation> getAllConversations(Context context) {
         Log.d(TAG, "getAllConversations()");
         String[] projection = {"DISTINCT " + Telephony.Sms.THREAD_ID,
@@ -219,7 +225,7 @@ public class ConversationsRepository {
     }
 
     /**
-     * Returns a messages object based on message if
+     * Returns a messages object based on message id
      *
      * @param context   Activity context
      * @param messageId Message id
