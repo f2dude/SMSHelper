@@ -2,10 +2,15 @@ package com.sp.smshelper.messages;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -26,6 +31,7 @@ public class SmsMessageDetailsFragment extends BaseFragment {
 
     private FragmentSmsDetailsBinding mBinding;
     private ConversationsViewModel mViewModel;
+    private String mMessageId;
 
     public static SmsMessageDetailsFragment newInstance(String messageId) {
 
@@ -46,25 +52,49 @@ public class SmsMessageDetailsFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
         //Set title
         getActivity().setTitle(R.string.message_details);
 
         mViewModel = ((ConversationsActivity) getActivity()).getViewModel();
 
         if (null != getArguments()) {
-            String messageId = getArguments().getString(BUNDLE_ARGS_MESSAGE_ID);
-            if (!TextUtils.isEmpty(messageId)) {
-                getSmsMessageDetails(messageId);
+            mMessageId = getArguments().getString(BUNDLE_ARGS_MESSAGE_ID);
+            if (!TextUtils.isEmpty(mMessageId)) {
+                getSmsMessageDetails();
             }
         }
     }
 
-    private void getSmsMessageDetails(String messageId) {
-        addToCompositeDisposable(mViewModel.getMessageDetailsById(messageId));
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.sms_details, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mark_as_read:
+                markAsRead();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void getSmsMessageDetails() {
+        addToCompositeDisposable(mViewModel.getMessageDetailsById(mMessageId));
         //Observe on data
         mViewModel.watchSmsMessageDetails().observe(getViewLifecycleOwner(),
                 messageDetails -> {
                     mBinding.setMessageDetails(messageDetails);
                 });
+    }
+
+    private void markAsRead() {
+        Log.d(TAG, "markAsRead()");
+        addToCompositeDisposable(mViewModel.markMessageAsRead(mMessageId));
     }
 }

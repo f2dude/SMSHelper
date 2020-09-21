@@ -1,5 +1,6 @@
 package com.sp.smshelper.conversation;
 
+import android.content.ContentProviderResult;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -143,6 +144,68 @@ public class ConversationsViewModel extends ViewModel {
 
     public LiveData<String> watchSmsMessageDetails() {
         return mMutableSmsMessageDetails;
+    }
+
+    public Disposable markAllMessagesAsRead(String threadId) {
+        Log.d(TAG, "markAllMessagesAsRead()");
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.markAllMessagesAsReadUsingThreadId(mContext, threadId);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(o -> Log.d(TAG, "markAllMessagesAsRead(), Rows updated: " + o));
+    }
+
+    public Disposable markMessageAsRead(String messageId) {
+        Log.d(TAG, "markMessageAsRead()");
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.markMessageAsRead(mContext, messageId);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(o -> {
+                    Log.d(TAG, "markMessageAsRead(), Rows updated: " + o);
+                    if (o > 0) {
+                        //Get the message details
+                        getMessageDetailsById(messageId);
+                    }
+                });
+    }
+
+    /**
+     * Deletes SMS threads
+     * @param threadIdsList Thread Ids list
+     * @return Operation results
+     */
+    Single<ContentProviderResult[]> deleteSmsThreads(List<String> threadIdsList) {
+        Log.d(TAG, "deleteSmsThreads()");
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.deleteSmsThreads(mContext, threadIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * Delets SMS messages
+     * @param messageIdsList Message Ids list
+     * @return Operation results
+     */
+    public Single<ContentProviderResult[]> deleteSmsMessages(List<String> messageIdsList) {
+        Log.d(TAG, "deleteSmsMessages()");
+
+        return Single.fromCallable(() -> {
+            ConversationsRepository conversationsRepository = new ConversationsRepository();
+            return conversationsRepository.deleteSmsMessages(mContext, messageIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     /**
