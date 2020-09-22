@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.provider.Telephony;
 import android.util.Log;
 
@@ -14,6 +15,7 @@ import com.sp.smshelper.model.SmsMessage;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +49,10 @@ public class ConversationsRepository {
 
                     conversation.setThreadId(getValue(cursor, Telephony.Sms.Conversations.THREAD_ID));
                     conversation.setSnippet(getValue(cursor, Telephony.Sms.Conversations.SNIPPET));
-                    conversation.setTotalMessageCount(getValue(cursor, Telephony.Sms.Conversations.MESSAGE_COUNT));
+//                    conversation.setTotalMessageCount(getValue(cursor, Telephony.Sms.Conversations.MESSAGE_COUNT));
+                    conversation.setDate("Sep 22, 2020");
+                    conversation.setAddress("7344860593");
+                    conversation.setRead(true);
 
                     conversationList.add(conversation);
                 }
@@ -453,5 +458,44 @@ public class ConversationsRepository {
             Log.e(TAG, "deleteSmsMessages(): " + e);
         }
         return results;
+    }
+
+    /**
+     * Saves the incoming SMS message
+     * @param context Activity context
+     * @param address From address
+     * @param messageBody Message text body
+     * @param isReplyPathPresent True if present, flase otherwise
+     * @param subscriptionId Active subscription id for finding out destination phone number
+     */
+    public void saveIncomingSmsMessage(Context context,
+                                       String address,
+                                       String messageBody,
+                                       boolean isReplyPathPresent,
+                                       int subscriptionId) {
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Sms.ADDRESS, address);
+            contentValues.put(Telephony.Sms.BODY, messageBody);
+            contentValues.put(Telephony.Sms.DATE, Calendar.getInstance().getTimeInMillis());
+            contentValues.put(Telephony.Sms.READ, 0);//by default false
+            contentValues.put(Telephony.Sms.STATUS, Telephony.Sms.STATUS_NONE);
+            contentValues.put(Telephony.Sms.TYPE, Telephony.Sms.MESSAGE_TYPE_INBOX);
+            contentValues.put(Telephony.Sms.REPLY_PATH_PRESENT, isReplyPathPresent);
+//            contentValues.put(Telephony.Sms.SUBJECT, "");
+//            contentValues.put(Telephony.Sms.CREATOR, );
+            contentValues.put(Telephony.Sms.DATE_SENT, Calendar.getInstance().getTimeInMillis());
+//            contentValues.put(Telephony.Sms.ERROR_CODE, );
+            contentValues.put(Telephony.Sms.LOCKED, 0);
+//            contentValues.put(Telephony.Sms.PERSON, );
+            contentValues.put(Telephony.Sms.SUBSCRIPTION_ID, subscriptionId);
+            contentValues.put(Telephony.Sms.SEEN, 1);//by default false
+
+            Uri uri = context.getContentResolver().insert(Telephony.Sms.CONTENT_URI, contentValues);
+            Log.d(TAG, "saveIncomingSmsMessage(), newly created uri: " + uri);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in saveIncomingSmsMessage(): " + e);
+        }
+
     }
 }
