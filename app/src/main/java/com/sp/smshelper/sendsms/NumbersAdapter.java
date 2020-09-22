@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.OwnNumberListItemBinding;
 
 import java.util.List;
@@ -55,6 +56,7 @@ public class NumbersAdapter extends RecyclerView.Adapter<NumbersAdapter.NumbersV
         }
 
         public void bind(SubscriptionInfo subscriptionInfo, int position) {
+            mBinding.setNotAvailable(mBinding.displayName.getContext().getString(R.string.not_available));
             mBinding.setInfo(subscriptionInfo);
             mBinding.setHolder(this);
             if (mSelectedPosition == position){

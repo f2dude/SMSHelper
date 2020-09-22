@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
+
+        <variable
+            name="notAvailable"
+            type="String" />
 
         <variable
             name="info"
@@ -14,6 +17,7 @@
             type="com.sp.smshelper.sendsms.NumbersAdapter.NumbersViewHolder" />
 
         <import type="android.telephony.PhoneNumberUtils" />
+        <import type="android.text.TextUtils"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -25,7 +29,7 @@
             android:id="@+id/displayName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{info.displayName}"
+            android:text="@{(info != null &amp;&amp; !TextUtils.isEmpty(info.displayName)) ? info.displayName : notAvailable}"
             android:textSize="@dimen/own_number_text_size"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -35,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/own_number_item_top_margin"
-            android:text="@{info.carrierName}"
+            android:text="@{(info != null &amp;&amp; !TextUtils.isEmpty(info.carrierName)) ? info.carrierName : notAvailable}"
             android:textSize="@dimen/own_number_text_size"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/displayName" />
@@ -45,7 +49,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/own_number_item_top_margin"
-            android:text="@{PhoneNumberUtils.formatNumber(info.number)}"
+            android:text="@{(info != null &amp;&amp; !TextUtils.isEmpty(info.number)) ? PhoneNumberUtils.formatNumber(info.number) : notAvailable}"
             android:textSize="@dimen/own_number_text_size"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/carrierName" />

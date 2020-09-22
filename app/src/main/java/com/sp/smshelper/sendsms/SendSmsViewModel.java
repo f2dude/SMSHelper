@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -132,6 +133,13 @@ public class SendSmsViewModel extends ViewModel {
 
         return Single.fromCallable(() -> {
             boolean status = false;
+            if (TextUtils.isEmpty(remoteNumber)) {
+                return false;
+            }
+
+            if (TextUtils.isEmpty(message)) {
+                return false;
+            }
             if (mSubscriptionId > -1) {
                 status = true;
                 PendingIntent sentPi = PendingIntent.getBroadcast(mContext, 0, new Intent(SENT), 0);
@@ -155,7 +163,13 @@ public class SendSmsViewModel extends ViewModel {
                 .subscribe(status ->
                         {
                             if (Boolean.FALSE.equals(status)) {
-                                Toast.makeText(mContext, mContext.getText(R.string.select_phone_number), Toast.LENGTH_SHORT).show();
+                                if (TextUtils.isEmpty(remoteNumber)) {
+                                    Toast.makeText(mContext, mContext.getText(R.string.enter_destination_number), Toast.LENGTH_SHORT).show();
+                                } else if (TextUtils.isEmpty(message)) {
+                                    Toast.makeText(mContext, mContext.getText(R.string.enter_message), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(mContext, mContext.getText(R.string.select_phone_number), Toast.LENGTH_SHORT).show();
+                                }
                             }
                         },
                         error -> Log.e(TAG, "Error in sendSMS(): " + error));
@@ -185,7 +199,7 @@ public class SendSmsViewModel extends ViewModel {
                 default:
                     break;
             }
-            mMutableMessageSent.setValue(context.getString(R.string.message_sent));
+            mMutableMessageSent.setValue(status);
             Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
         }
     };
@@ -205,7 +219,7 @@ public class SendSmsViewModel extends ViewModel {
                 default:
                     break;
             }
-            mMutableMessageDelivered.setValue(context.getString(R.string.message_delivered));
+            mMutableMessageDelivered.setValue(status);
             Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
         }
     };

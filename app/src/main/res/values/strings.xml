@@ -23,4 +23,6 @@
     <string name="title_zero">0</string>
     <string name="select">Select</string>
     <string name="delete">Delete</string>
+    <string name="enter_destination_number">Enter destination number</string>
+    <string name="not_available">Not available</string>
 </resources>
