@@ -493,7 +493,7 @@ public class ConversationsRepository {
             contentValues.put(Telephony.Sms.LOCKED, 0);
 //            contentValues.put(Telephony.Sms.PERSON, );
             contentValues.put(Telephony.Sms.SUBSCRIPTION_ID, subscriptionId);
-            contentValues.put(Telephony.Sms.SEEN, 1);//by default false
+            contentValues.put(Telephony.Sms.SEEN, 1);//by default true
 
             Uri uri = context.getContentResolver().insert(Telephony.Sms.CONTENT_URI, contentValues);
             Log.d(TAG, "saveIncomingSmsMessage(), newly created uri: " + uri);
