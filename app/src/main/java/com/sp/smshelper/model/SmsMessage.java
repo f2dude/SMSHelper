@@ -1,7 +1,5 @@
 package com.sp.smshelper.model;
 
-import java.util.Date;
-
 public class SmsMessage {
 
     public enum MessageType {
@@ -16,7 +14,7 @@ public class SmsMessage {
     private String messageId;
     private String address;
     private String body;
-    private Date date;
+    private String date;
     private MessageType type;
     private String protocol;
     private boolean read;
@@ -24,12 +22,12 @@ public class SmsMessage {
     private String replyPathPresent;
     private String subject;
     private String creator;
-    private Date dateSent;
+    private String dateSent;
     private String errorCode;
     private boolean locked;
     private String person;
     private String subscriptionId;
-    private String seen;
+    private boolean seen;
 
     public String getCreator() {
         return creator;
@@ -39,11 +37,11 @@ public class SmsMessage {
         this.creator = creator;
     }
 
-    public Date getDateSent() {
+    public String getDateSent() {
         return dateSent;
     }
 
-    public void setDateSent(Date dateSent) {
+    public void setDateSent(String dateSent) {
         this.dateSent = dateSent;
     }
 
@@ -103,11 +101,11 @@ public class SmsMessage {
         this.body = body;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -167,11 +165,11 @@ public class SmsMessage {
         this.subscriptionId = subscriptionId;
     }
 
-    public String isSeen() {
+    public boolean isSeen() {
         return seen;
     }
 
-    public void setSeen(String seen) {
+    public void setSeen(boolean seen) {
         this.seen = seen;
     }
 }

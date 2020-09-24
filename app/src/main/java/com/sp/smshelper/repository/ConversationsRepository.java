@@ -16,7 +16,6 @@ import com.sp.smshelper.model.SmsMessage;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -77,6 +76,7 @@ public class ConversationsRepository {
         Log.d(TAG, "getAllConversations()");
         String[] projection = {"DISTINCT " + Telephony.Sms.THREAD_ID,
                 Telephony.Sms.BODY,
+                "max(" + Telephony.Sms.DATE + ")",
                 Telephony.Sms.DATE,
                 Telephony.Sms.ADDRESS,
                 Telephony.Sms.READ};
@@ -95,10 +95,7 @@ public class ConversationsRepository {
                     Conversation conversation = new Conversation();
                     conversation.setThreadId(getValue(cursor, Telephony.Sms.THREAD_ID));
                     conversation.setSnippet(getValue(cursor, Telephony.Sms.BODY));
-
-                    String smsDate = getValue(cursor, Telephony.Sms.DATE);
-                    SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy", Locale.getDefault());
-                    conversation.setDate(sdf.format(Long.parseLong(smsDate)));
+                    conversation.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Sms.DATE))));
                     conversation.setAddress(getValue(cursor, Telephony.Sms.ADDRESS));
                     boolean read = false;
                     if (Integer.parseInt(getValue(cursor, Telephony.Sms.READ)) == 1) {
@@ -130,10 +127,17 @@ public class ConversationsRepository {
         Log.d(TAG, "getSmsMessagesByThreadId(), Thread id: " + threadId);
 
         ContentResolver contentResolver = context.getContentResolver();
+        String[] projection = {Telephony.Sms.THREAD_ID,
+                Telephony.Sms._ID,
+                Telephony.Sms.ADDRESS,
+                Telephony.Sms.BODY,
+                Telephony.Sms.DATE,
+                Telephony.Sms.TYPE,
+                Telephony.Sms.STATUS};
         String selection = Telephony.Sms.THREAD_ID + " = ?";
         String[] selectionArgs = new String[]{threadId};
         Cursor cursor = contentResolver.query(Telephony.Sms.CONTENT_URI,
-                null,
+                projection,
                 selection,
                 selectionArgs,
                 Telephony.Sms.DEFAULT_SORT_ORDER);
@@ -148,10 +152,7 @@ public class ConversationsRepository {
                     smsMessage.setMessageId(getValue(cursor, Telephony.Sms._ID));
                     smsMessage.setAddress(getValue(cursor, Telephony.Sms.ADDRESS));
                     smsMessage.setBody(getValue(cursor, Telephony.Sms.BODY));
-
-                    String smsDate = getValue(cursor, Telephony.Sms.DATE);
-                    Date dateFormat = new Date(Long.parseLong(smsDate));
-                    smsMessage.setDate(dateFormat);
+                    smsMessage.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Sms.DATE))));
 
                     SmsMessage.MessageType type = null;
                     switch (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.TYPE)))) {
@@ -180,12 +181,6 @@ public class ConversationsRepository {
                             break;
                     }
                     smsMessage.setType(type);
-                    smsMessage.setProtocol(getValue(cursor, Telephony.Sms.PROTOCOL));
-                    boolean read = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.READ)) == 1) {
-                        read = true;
-                    }
-                    smsMessage.setRead(read);
                     SmsMessage.MessageStatus status = null;
                     switch (Integer.parseInt(getValue(cursor, Telephony.Sms.STATUS))) {
                         case Telephony.Sms.STATUS_COMPLETE:
@@ -204,18 +199,6 @@ public class ConversationsRepository {
                             break;
                     }
                     smsMessage.setStatus(status);
-                    smsMessage.setReplyPathPresent(getValue(cursor, Telephony.Sms.REPLY_PATH_PRESENT));
-                    smsMessage.setSubject(getValue(cursor, Telephony.Sms.SUBJECT));
-                    smsMessage.setCreator(getValue(cursor, Telephony.Sms.CREATOR));
-                    dateFormat = new Date(Long.parseLong(getValue(cursor, Telephony.Sms.DATE_SENT)));
-                    smsMessage.setDateSent(dateFormat);
-                    smsMessage.setErrorCode(getValue(cursor, Telephony.Sms.ERROR_CODE));
-                    boolean locked = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.LOCKED)) == 1) {
-                        locked = true;
-                    }
-                    smsMessage.setLocked(locked);
-                    smsMessage.setPerson(getValue(cursor, Telephony.Sms.PERSON));
 
                     smsMessageList.add(smsMessage);
                 }
@@ -258,10 +241,7 @@ public class ConversationsRepository {
                     smsMessage.setMessageId(getValue(cursor, Telephony.Sms._ID));
                     smsMessage.setAddress(getValue(cursor, Telephony.Sms.ADDRESS));
                     smsMessage.setBody(getValue(cursor, Telephony.Sms.BODY));
-
-                    String smsDate = getValue(cursor, Telephony.Sms.DATE);
-                    Date dateFormat = new Date(Long.parseLong(smsDate));
-                    smsMessage.setDate(dateFormat);
+                    smsMessage.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Sms.DATE))));
 
                     SmsMessage.MessageType type = null;
                     switch (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.TYPE)))) {
@@ -317,8 +297,7 @@ public class ConversationsRepository {
                     smsMessage.setReplyPathPresent(getValue(cursor, Telephony.Sms.REPLY_PATH_PRESENT));
                     smsMessage.setSubject(getValue(cursor, Telephony.Sms.SUBJECT));
                     smsMessage.setCreator(getValue(cursor, Telephony.Sms.CREATOR));
-                    dateFormat = new Date(Long.parseLong(getValue(cursor, Telephony.Sms.DATE_SENT)));
-                    smsMessage.setDateSent(dateFormat);
+                    smsMessage.setDateSent(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Sms.DATE_SENT))));
                     smsMessage.setErrorCode(getValue(cursor, Telephony.Sms.ERROR_CODE));
                     boolean locked = false;
                     if (Integer.parseInt(getValue(cursor, Telephony.Sms.LOCKED)) == 1) {
@@ -327,7 +306,11 @@ public class ConversationsRepository {
                     smsMessage.setLocked(locked);
                     smsMessage.setPerson(getValue(cursor, Telephony.Sms.PERSON));
                     smsMessage.setSubscriptionId(getValue(cursor, Telephony.Sms.SUBSCRIPTION_ID));
-                    smsMessage.setSeen(getValue(cursor, Telephony.Sms.SEEN));
+                    boolean isSeen = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Sms.SEEN)) == 1) {
+                        isSeen = true;
+                    }
+                    smsMessage.setSeen(isSeen);
                 }
             }
         } catch (Exception e) {
@@ -545,9 +528,10 @@ public class ConversationsRepository {
 
     /**
      * Updates the delivery status of sent message
+     *
      * @param context Activity context
-     * @param uri Record uri
-     * @param status Delivery status
+     * @param uri     Record uri
+     * @param status  Delivery status
      */
     public void updateDeliveryStatusOfSentMessage(Context context, Uri uri, int status) {
         Log.d(TAG, "updateDeliveryStatusOfSentMessage(), Uri: " + uri + " ,Status: " + status);
@@ -563,5 +547,16 @@ public class ConversationsRepository {
         } catch (Exception e) {
             Log.e(TAG, "Exception in updateDeliveryStatusOfSentMessage(): " + e);
         }
+    }
+
+    /**
+     * Returns the formatted date
+     *
+     * @param time Date time in milliseconds
+     * @return Formatted date string
+     */
+    private String getFormattedDate(long time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy h:m a", Locale.getDefault());
+        return sdf.format(time);
     }
 }
