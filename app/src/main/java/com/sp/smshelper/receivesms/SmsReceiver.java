@@ -57,7 +57,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     ConversationsRepository conversationsRepository = new ConversationsRepository();
                     conversationsRepository.saveIncomingSmsMessage(context, address, message.toString(), isReplyPathPresent, subscription);
                 } else if (intent.getAction().equals("android.provider.Telephony.SMS_DELIVER")) {
-
+                    //Do nothing
                 }
             }
 

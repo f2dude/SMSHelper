@@ -8,7 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.Telephony;
 import android.telephony.SmsManager;
+import android.telephony.SmsMessage;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
@@ -21,6 +24,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.sp.smshelper.R;
+import com.sp.smshelper.repository.ConversationsRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +39,9 @@ public class SendSmsViewModel extends ViewModel {
     private static final String TAG = SendSmsViewModel.class.getSimpleName();
     private static final String SENT = "SMS_SENT";
     private static final String DELIVERED = "SMS_DELIVERED";
+    private static final String REMOTE_NUMBER = "remote_number";
+    private static final String MESSAGE_BODY = "message_body";
+    private static final String MESSAGE_URI = "message_uri";
 
     private MutableLiveData<List<SubscriptionInfo>> mMutableSimCardsList = new MutableLiveData<>();
     private MutableLiveData<String> mMutableMessageSent = new MutableLiveData<>();
@@ -141,9 +148,24 @@ public class SendSmsViewModel extends ViewModel {
                 return false;
             }
             if (mSubscriptionId > -1) {
+                //Save outgoing message in the beginning
+                Uri uri = saveOutgoingSmsMessage(remoteNumber, message);
+
                 status = true;
-                PendingIntent sentPi = PendingIntent.getBroadcast(mContext, 0, new Intent(SENT), 0);
-                PendingIntent deliveredPi = PendingIntent.getBroadcast(mContext, 0, new Intent(DELIVERED), 0);
+                Intent sentIntent = new Intent(SENT);
+                PendingIntent sentPi = PendingIntent.getBroadcast(mContext,
+                        0,
+                        sentIntent,
+                        PendingIntent.FLAG_ONE_SHOT);
+
+                Intent deliverIntent = new Intent(DELIVERED);
+                deliverIntent.putExtra(REMOTE_NUMBER, remoteNumber);
+                deliverIntent.putExtra(MESSAGE_BODY, message);
+                deliverIntent.putExtra(MESSAGE_URI, uri.toString());
+                PendingIntent deliveredPi = PendingIntent.getBroadcast(mContext,
+                        0,
+                        deliverIntent,
+                        PendingIntent.FLAG_ONE_SHOT);
 
                 SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId(mSubscriptionId);
                 ArrayList<String> parts = smsManager.divideMessage(message);
@@ -175,32 +197,43 @@ public class SendSmsViewModel extends ViewModel {
                         error -> Log.e(TAG, "Error in sendSMS(): " + error));
     }
 
+    private Uri saveOutgoingSmsMessage(String address, String message) {
+        Log.d(TAG, "saveOutgoingSmsMessage()");
+        //Save outgoing SMS message
+        ConversationsRepository conversationsRepository = new ConversationsRepository();
+        return conversationsRepository.saveOutgoingSmsMessage(mContext, address, message, mSubscriptionId);
+    }
+
     private BroadcastReceiver sentBR = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "=====Sent broadcast receiver=====");
-            String status = "NULL";
-            switch (getResultCode()) {
-                case Activity.RESULT_OK:
-                    status = "SENT";
-                    break;
-                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                    status = "RESULT_ERROR_GENERIC_FAILURE";
-                    break;
-                case SmsManager.RESULT_ERROR_NO_SERVICE:
-                    status = "RESULT_ERROR_NO_SERVICE";
-                    break;
-                case SmsManager.RESULT_ERROR_NULL_PDU:
-                    status = "RESULT_ERROR_NULL_PDU";
-                    break;
-                case SmsManager.RESULT_ERROR_RADIO_OFF:
-                    status = "RESULT_ERROR_RADIO_OFF";
-                    break;
-                default:
-                    break;
-            }
+            String status = translateSentResult(getResultCode());
             mMutableMessageSent.setValue(status);
             Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
+        }
+
+        /**
+         * Translates status codes of SMS sent status
+         *
+         * @param resultCode SMS sent status result code
+         * @return Status of SMS message
+         */
+        private String translateSentResult(int resultCode) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    return "Sent";
+                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                    return "RESULT_ERROR_GENERIC_FAILURE";
+                case SmsManager.RESULT_ERROR_RADIO_OFF:
+                    return "RESULT_ERROR_RADIO_OFF";
+                case SmsManager.RESULT_ERROR_NULL_PDU:
+                    return "RESULT_ERROR_NULL_PDU";
+                case SmsManager.RESULT_ERROR_NO_SERVICE:
+                    return "RESULT_ERROR_NO_SERVICE";
+                default:
+                    return "Unknown error code";
+            }
         }
     };
 
@@ -208,19 +241,74 @@ public class SendSmsViewModel extends ViewModel {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "=====Delivered broadcast receiver=====");
-            String status = "NULL";
-            switch (getResultCode()) {
-                case Activity.RESULT_OK:
-                    status = "DELIVERED";
-                    break;
-                case Activity.RESULT_CANCELED:
-                    status = "NOT DELIVERED";
-                    break;
+
+            Single.fromCallable(() -> {
+                //Get SMS status
+                SmsMessage sms = null;
+                // A delivery result comes from the service center as a simple SMS in a single PDU.
+                byte[] pdu = intent.getByteArrayExtra("pdu");
+                String format = intent.getStringExtra("format");
+
+                // Construct the SmsMessage from the PDU.
+                sms = SmsMessage.createFromPdu(pdu, format);
+
+                // getResultCode() is not reliable for delivery results.
+                // We need to get the status from the SmsMessage.
+                String deliveryResult = "Delivery result : " + translateDeliveryStatus(sms.getStatus());
+                Log.d(TAG, "Status: " + sms.getStatus() + " , Delivery result: " + deliveryResult);
+
+                String uri = intent.getStringExtra(MESSAGE_URI);
+                Log.d(TAG, "Message uri: " + uri
+                        + " ,Number: " + intent.getStringExtra(REMOTE_NUMBER)
+                        + " ,Message: " + intent.getStringExtra(MESSAGE_BODY));
+
+                //Update delivery status
+                if (!TextUtils.isEmpty(uri)) {
+                    ConversationsRepository conversationsRepository = new ConversationsRepository();
+                    conversationsRepository.updateDeliveryStatusOfSentMessage(mContext, Uri.parse(uri), sms.getStatus());
+                }
+
+                //Get result code status
+                String status = "NULL";
+                switch (getResultCode()) {
+                    case Activity.RESULT_OK:
+                        status = "DELIVERED";
+                        break;
+                    case Activity.RESULT_CANCELED:
+                        status = "NOT DELIVERED";
+                        break;
+                    default:
+                        break;
+                }
+                return status;
+            })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(s -> {
+                        mMutableMessageDelivered.setValue(s);
+                        Toast.makeText(mContext, s, Toast.LENGTH_SHORT).show();
+                    }, error -> Log.e(TAG, "Error in broadcast receiver deliveredBr: " + error));
+        }
+
+        /**
+         * Translates the status code of delivery status
+         *
+         * @param status Delivery status code
+         * @return Delivery status
+         */
+        private String translateDeliveryStatus(int status) {
+            switch (status) {
+                case Telephony.Sms.STATUS_COMPLETE:
+                    return "Sms.STATUS_COMPLETE";
+                case Telephony.Sms.STATUS_FAILED:
+                    return "Sms.STATUS_FAILED";
+                case Telephony.Sms.STATUS_PENDING:
+                    return "Sms.STATUS_PENDING";
+                case Telephony.Sms.STATUS_NONE:
+                    return "Sms.STATUS_NONE";
                 default:
-                    break;
+                    return "Unknown status code";
             }
-            mMutableMessageDelivered.setValue(status);
-            Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
         }
     };
 }

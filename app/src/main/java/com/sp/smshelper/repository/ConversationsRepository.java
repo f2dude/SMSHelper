@@ -69,6 +69,7 @@ public class ConversationsRepository {
 
     /**
      * Gets all conversations from SMS table
+     *
      * @param context Activity context
      * @return Conversation list
      */
@@ -408,7 +409,8 @@ public class ConversationsRepository {
 
     /**
      * Deletes sms threads
-     * @param context Activity context
+     *
+     * @param context   Activity context
      * @param threadIds List of thread ids
      * @return Content provider results
      */
@@ -435,7 +437,8 @@ public class ConversationsRepository {
 
     /**
      * Deletes sms messages
-     * @param context Activity context
+     *
+     * @param context    Activity context
      * @param messageIds List of message ids
      * @return Content provider results
      */
@@ -462,11 +465,12 @@ public class ConversationsRepository {
 
     /**
      * Saves the incoming SMS message
-     * @param context Activity context
-     * @param address From address
-     * @param messageBody Message text body
+     *
+     * @param context            Activity context
+     * @param address            From address
+     * @param messageBody        Message text body
      * @param isReplyPathPresent True if present, flase otherwise
-     * @param subscriptionId Active subscription id for finding out destination phone number
+     * @param subscriptionId     Active subscription id for finding out destination phone number
      */
     public void saveIncomingSmsMessage(Context context,
                                        String address,
@@ -497,5 +501,61 @@ public class ConversationsRepository {
             Log.e(TAG, "Exception in saveIncomingSmsMessage(): " + e);
         }
 
+    }
+
+    /**
+     * Saves outgoing message
+     *
+     * @param context        Activity context
+     * @param address        Remote party number
+     * @param messageBody    Message bosy
+     * @param subscriptionId Subscription id to fetch number
+     * @return Newly created uri
+     */
+    public Uri saveOutgoingSmsMessage(Context context,
+                                      String address,
+                                      String messageBody,
+                                      int subscriptionId) {
+        Uri uri = null;
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Sms.ADDRESS, address);
+            contentValues.put(Telephony.Sms.BODY, messageBody);
+            contentValues.put(Telephony.Sms.DATE, Calendar.getInstance().getTimeInMillis());
+            contentValues.put(Telephony.Sms.READ, 1);//by default true
+            contentValues.put(Telephony.Sms.STATUS, Telephony.Sms.STATUS_NONE);
+            contentValues.put(Telephony.Sms.TYPE, Telephony.Sms.MESSAGE_TYPE_SENT);
+//            contentValues.put(Telephony.Sms.REPLY_PATH_PRESENT, isReplyPathPresent);
+//            contentValues.put(Telephony.Sms.SUBJECT, "");
+//            contentValues.put(Telephony.Sms.CREATOR, );
+            contentValues.put(Telephony.Sms.DATE_SENT, Calendar.getInstance().getTimeInMillis());
+//            contentValues.put(Telephony.Sms.ERROR_CODE, );
+            contentValues.put(Telephony.Sms.LOCKED, 0);//by default false
+//            contentValues.put(Telephony.Sms.PERSON, );
+            contentValues.put(Telephony.Sms.SUBSCRIPTION_ID, subscriptionId);
+            contentValues.put(Telephony.Sms.SEEN, 1);//by default true
+
+            uri = context.getContentResolver().insert(Telephony.Sms.CONTENT_URI, contentValues);
+            Log.d(TAG, "saveOutgoingSmsMessage(), newly created uri: " + uri);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in saveOutgoingSmsMessage(): " + e);
+        }
+        return uri;
+    }
+
+    public void updateDeliveryStatusOfSentMessage(Context context, Uri uri, int status) {
+        Log.d(TAG, "updateDeliveryStatusOfSentMessage(), Uri: " + uri + " ,Status: " + status);
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Sms.STATUS, status);
+
+            int rowsUpdated = context.getContentResolver().update(uri,
+                    contentValues,
+                    null,
+                    null);
+            Log.d(TAG, "Rows updated: " + rowsUpdated);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in updateDeliveryStatusOfSentMessage(): " + e);
+        }
     }
 }
