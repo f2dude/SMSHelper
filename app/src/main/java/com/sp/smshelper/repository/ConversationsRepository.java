@@ -543,6 +543,12 @@ public class ConversationsRepository {
         return uri;
     }
 
+    /**
+     * Updates the delivery status of sent message
+     * @param context Activity context
+     * @param uri Record uri
+     * @param status Delivery status
+     */
     public void updateDeliveryStatusOfSentMessage(Context context, Uri uri, int status) {
         Log.d(TAG, "updateDeliveryStatusOfSentMessage(), Uri: " + uri + " ,Status: " + status);
         try {
