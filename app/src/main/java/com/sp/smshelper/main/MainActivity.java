@@ -1,9 +1,13 @@
 package com.sp.smshelper.main;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.role.RoleManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Telephony;
 import android.util.Log;
@@ -14,10 +18,10 @@ import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.sp.smshelper.BuildConfig;
 import com.sp.smshelper.R;
 import com.sp.smshelper.conversation.ConversationsActivity;
 import com.sp.smshelper.databinding.ActivityMainBinding;
+import com.sp.smshelper.readmms.ReadMmsActivity;
 import com.sp.smshelper.sendsms.SendSmsActivity;
 
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -90,15 +94,43 @@ public class MainActivity extends BaseActivity implements IMainActivity {
     }
 
     /**
+     * Navigates to read mms screen
+     */
+    @Override
+    public void readMms() {
+        Log.d(TAG, "readMms()");
+        //start activity
+        startActivity(new Intent(this, ReadMmsActivity.class));
+    }
+
+    /**
+     * Navigates to send mms screen
+     */
+    @Override
+    public void sendMms() {
+        Log.d(TAG, "sendMms()");
+    }
+
+    /**
      * Requests for default app
      */
     private void requestDefaultApp() {
         Disposable disposable = mViewModel.checkDefaultApp(this)
                 .subscribe(aBoolean -> {
                     if (!aBoolean) {
-                        Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
-                        intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, BuildConfig.APPLICATION_ID);
-                        startActivityForResult(intent, REQUEST_DEFAULT_APP);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            @SuppressLint("WrongConstant")
+                            RoleManager roleManager = (RoleManager) getSystemService(Context.ROLE_SERVICE);
+                            assert roleManager != null;
+                            if (roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                                Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS);
+                                startActivityForResult(intent, REQUEST_DEFAULT_APP);
+                            }
+                        } else {
+                            Intent intent = new Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+                            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, getPackageName());
+                            startActivityForResult(intent, REQUEST_DEFAULT_APP);
+                        }
                     }
                 });
         addToCompositeDisposable(disposable);

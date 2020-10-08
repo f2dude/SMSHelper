@@ -5,4 +5,8 @@ public interface IMainActivity {
     void readSms();
 
     void sendSms();
+
+    void readMms();
+
+    void sendMms();
 }

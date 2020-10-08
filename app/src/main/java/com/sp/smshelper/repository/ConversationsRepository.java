@@ -13,14 +13,12 @@ import android.util.Log;
 import com.sp.smshelper.model.Conversation;
 import com.sp.smshelper.model.SmsMessage;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
-public class ConversationsRepository {
+public class ConversationsRepository extends BaseRepository{
 
     private static final String TAG = ConversationsRepository.class.getSimpleName();
 
@@ -324,17 +322,6 @@ public class ConversationsRepository {
     }
 
     /**
-     * Gets value from column using cursor
-     *
-     * @param cursor     Cursor object
-     * @param columnName Name of column
-     * @return The actual value
-     */
-    private String getValue(Cursor cursor, String columnName) {
-        return cursor.getString(cursor.getColumnIndexOrThrow(columnName));
-    }
-
-    /**
      * Marks all messages as read using thread id
      * Message of type INBOX and whose READ status is 0 are marked as read
      *
@@ -547,16 +534,5 @@ public class ConversationsRepository {
         } catch (Exception e) {
             Log.e(TAG, "Exception in updateDeliveryStatusOfSentMessage(): " + e);
         }
-    }
-
-    /**
-     * Returns the formatted date
-     *
-     * @param time Date time in milliseconds
-     * @return Formatted date string
-     */
-    private String getFormattedDate(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy h:m a", Locale.getDefault());
-        return sdf.format(time);
     }
 }
