@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.sp.smshelper.model.MmsConversation;
+import com.sp.smshelper.model.MmsMessage;
 import com.sp.smshelper.repository.MmsRepository;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class MmsViewModel extends ViewModel {
     private Context mContext;
 
     private MutableLiveData<List<MmsConversation>> mMutableMmsConversations = new MutableLiveData<>();
+    private MutableLiveData<List<MmsMessage>> mMutableMmsMessages = new MutableLiveData<>();
 
     public void setContext(Context context) {
         this.mContext = context;
@@ -41,36 +43,45 @@ public class MmsViewModel extends ViewModel {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(resultObject -> {
+                .subscribe(resultObject ->
                     //Set data
-                    mMutableMmsConversations.setValue(resultObject);
-
-                            for (MmsConversation mmsConversation : resultObject) {
-                                    Log.d(TAG, "Thread id: " + mmsConversation.getThreadId());
-                                    Log.d(TAG, "Date: " + mmsConversation.getDate());
-                                    Log.d(TAG, "Content type: " + mmsConversation.getContentType());
-                                    Log.d(TAG, "Read: " + mmsConversation.isRead());
-                                    Log.d(TAG, "Text only: " + mmsConversation.isTextOnly());
-                                    Log.d(TAG, "Text: " + mmsConversation.getText());
-                                    for(String address: mmsConversation.getAddressList()) {
-                                        Log.d(TAG, "Address: " + address);
-                                    }
-                                    if (mmsConversation.getData() != null) {
-                                        Log.d(TAG, "Content type: " + mmsConversation.getData().getContentType());
-                                        Log.d(TAG, "Data path: " + mmsConversation.getData().getDataPath());
-                                    }
-                                    Log.d(TAG, "+++++++++++++++++++++++++++++++++++++");
-                            }
-                        },
+                    mMutableMmsConversations.setValue(resultObject),
                         error -> Log.e(TAG, "Error in getAllMmsConversations(): " + error));
     }
 
     /**
      * Returns MMS conversations
-     * Method used to provide live updates of data
+     * Method used to provide live updates on data
      * @return MMS conversation list
      */
-    public LiveData<List<MmsConversation>> watchMmsConversations() {
+    LiveData<List<MmsConversation>> watchMmsConversations() {
         return mMutableMmsConversations;
+    }
+
+    /**
+     * Returns list of MMS messages mapped based on thread id
+     * @param threadId Thread Id
+     * @return Disposable object
+     */
+    public Disposable getMmsMessagesByThreadId(String threadId) {
+        return Single.fromCallable(() -> {
+            MmsRepository mmsRepository = new MmsRepository();
+            return mmsRepository.getMmsMessagesByThreadId(mContext, threadId);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(resultObject ->
+                                //set data
+                                mMutableMmsMessages.setValue(resultObject),
+                        error -> Log.e(TAG, "Error in getMmsMessagesByThreadId(): " + error));
+    }
+
+    /**
+     * Returns MMS messages
+     * Method used to provide live updates on data
+     * @return MMS message list
+     */
+    LiveData<List<MmsMessage>> watchMmsMessages() {
+        return mMutableMmsMessages;
     }
 }

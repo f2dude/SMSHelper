@@ -117,7 +117,7 @@ public class ConversationsViewModel extends ViewModel {
         sb.append(newLine);
         sb.append("Protocol: ").append(messageDetails.getProtocol());
         sb.append(newLine);
-        sb.append("Read status: ").append(messageDetails.getRead());
+        sb.append("Read status: ").append(messageDetails.isRead());
         sb.append(newLine);
         sb.append("Message status: ").append(messageDetails.getStatus());
         sb.append(newLine);

@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.provider.Telephony;
 import android.util.Log;
 
+import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
+import com.sp.smshelper.model.MmsMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +31,6 @@ public class MmsRepository extends BaseRepository {
                 Telephony.Mms._ID,
                 "max(" + Telephony.Mms.DATE + ")",
                 Telephony.Mms.DATE,
-                Telephony.Mms.READ,
-                Telephony.Mms.CONTENT_TYPE,
                 Telephony.Mms.TEXT_ONLY,
                 Telephony.Mms.MESSAGE_BOX};
         String selection = Telephony.Mms.THREAD_ID + " IS NOT NULL) GROUP BY (" + Telephony.Mms.THREAD_ID;
@@ -48,11 +48,7 @@ public class MmsRepository extends BaseRepository {
                     mmsConversation.setThreadId(getValue(cursor, Telephony.Mms.THREAD_ID));
                     //Bug in MMS date column.That's why had to multiply by 1000
                     mmsConversation.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE)) * 1000));
-                    boolean read = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ)) == 1) {
-                        read = true;
-                    }
-                    mmsConversation.setRead(read);
+
                     String mmsId = getValue(cursor, Telephony.Mms._ID);
                     boolean textOnly = false;
                     if (Integer.parseInt(getValue(cursor, Telephony.Mms.TEXT_ONLY)) == 1) {//For text
@@ -104,13 +100,94 @@ public class MmsRepository extends BaseRepository {
     }
 
     /**
+     * Get all MMS messages using thread id
+     *
+     * @param context  Activity context
+     * @param threadId MMS thread Id
+     * @return MMS message list
+     */
+    public List<MmsMessage> getMmsMessagesByThreadId(Context context, String threadId) {
+        Log.d(TAG, "getMmsMessagesByThreadId()");
+
+        ContentResolver contentResolver = context.getContentResolver();
+        String[] projection = {Telephony.Mms.THREAD_ID,
+                Telephony.Mms._ID,
+                Telephony.Mms.DATE,
+                Telephony.Mms.TEXT_ONLY,
+                Telephony.Mms.MESSAGE_BOX};
+        String selection = Telephony.Mms.THREAD_ID + " = ?";
+        String[] selectionArgs = new String[]{threadId};
+        Cursor cursor = contentResolver.query(Telephony.Mms.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                Telephony.Mms.DEFAULT_SORT_ORDER);
+
+        List<MmsMessage> mmsMessageList = new ArrayList<>();
+        try {
+            if (null != cursor) {
+                Log.d(TAG, "Cursor count: " + cursor.getCount());
+                while (cursor.moveToNext()) {
+                    MmsMessage mmsMessage = new MmsMessage();
+                    mmsMessage.setThreadId(getValue(cursor, Telephony.Mms.THREAD_ID));
+                    String mmsId = getValue(cursor, Telephony.Mms._ID);
+                    mmsMessage.setMessageId(mmsId);
+                    mmsMessage.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE)) * 1000));
+                    boolean textOnly = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.TEXT_ONLY)) == 1) {//For text
+                        textOnly = true;
+                        //get text
+                        mmsMessage.setText(getMmsText(context, mmsId, mmsMessage));
+                    } else {//For everything else
+                        mmsMessage.setData(getMmsData(context, mmsId, mmsMessage));
+                    }
+                    mmsMessage.setTextOnly(textOnly);
+                    MmsConversation.MessageType type = null;
+                    switch (Integer.parseInt(getValue(cursor, Telephony.Mms.MESSAGE_BOX))) {
+                        case Telephony.Mms.MESSAGE_BOX_ALL:
+                            type = MmsConversation.MessageType.ALL;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_DRAFTS:
+                            type = MmsConversation.MessageType.DRAFT;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_FAILED:
+                            type = MmsConversation.MessageType.FAILED;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_INBOX:
+                            type = MmsConversation.MessageType.INBOX;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_OUTBOX:
+                            type = MmsConversation.MessageType.OUTBOX;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_SENT:
+                            type = MmsConversation.MessageType.SENT;
+                            break;
+                        default:
+                            break;
+                    }
+                    mmsMessage.setMessageBoxType(type);
+
+                    mmsMessageList.add(mmsMessage);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in getMmsMessagesByThreadId(): " + e);
+        } finally {
+            if (null != cursor) {
+                cursor.close();
+            }
+        }
+        return mmsMessageList;
+    }
+
+    /**
      * Returns MMS text associated with MMS message
      *
      * @param context Activity context
      * @param mmsId   MMS id
      * @return MMS text
      */
-    private String getMmsText(Context context, String mmsId, MmsConversation mmsConversation) {
+    private String getMmsText(Context context, String mmsId, BaseModel mmsConversation) {
         StringBuilder sb = new StringBuilder();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part.TEXT};
@@ -186,7 +263,7 @@ public class MmsRepository extends BaseRepository {
         return addressList;
     }
 
-    private MmsConversation.Data getMmsData(Context context, String mmsId, MmsConversation mmsConversation) {
+    private MmsConversation.Data getMmsData(Context context, String mmsId, BaseModel mmsConversation) {
         MmsConversation.Data data = null;
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part._DATA};
