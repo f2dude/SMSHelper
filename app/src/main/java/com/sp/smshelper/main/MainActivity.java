@@ -21,7 +21,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.sp.smshelper.R;
 import com.sp.smshelper.conversation.ConversationsActivity;
 import com.sp.smshelper.databinding.ActivityMainBinding;
-import com.sp.smshelper.readmms.ReadMmsActivity;
+import com.sp.smshelper.readmms.MmsConversationActivity;
 import com.sp.smshelper.sendsms.SendSmsActivity;
 
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -100,7 +100,7 @@ public class MainActivity extends BaseActivity implements IMainActivity {
     public void readMms() {
         Log.d(TAG, "readMms()");
         //start activity
-        startActivity(new Intent(this, ReadMmsActivity.class));
+        startActivity(new Intent(this, MmsConversationActivity.class));
     }
 
     /**

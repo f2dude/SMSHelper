@@ -25,7 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".conversation.ConversationsActivity" />
-        <activity android:name=".readmms.ReadMmsActivity"/>
+        <activity android:name=".readmms.MmsConversationActivity"/>
         <activity
             android:name=".sendsms.SendSmsActivity"
             android:windowSoftInputMode="adjustPan">

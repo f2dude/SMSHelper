@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.ActivityReadMmsBinding;
 
-public class ReadMmsActivity extends AppCompatActivity {
+public class MmsConversationActivity extends AppCompatActivity {
 
     private ActivityReadMmsBinding mBinding;
     private MmsViewModel mViewModel;
@@ -30,8 +30,8 @@ public class ReadMmsActivity extends AppCompatActivity {
         //Fragment transaction
         getSupportFragmentManager().beginTransaction()
                 .replace(mBinding.actionContainer.getId(),
-                        ReadMmsFragment.newInstance(),
-                        ReadMmsFragment.TAG)
+                        MmsConversationFragment.newInstance(),
+                        MmsConversationFragment.TAG)
                 .commit();
     }
 

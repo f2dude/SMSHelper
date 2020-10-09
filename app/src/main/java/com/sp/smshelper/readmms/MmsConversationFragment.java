@@ -20,19 +20,19 @@ import com.sp.smshelper.views.SimpleDividerItemDecoration;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ReadMmsFragment extends BaseFragment {
+public class MmsConversationFragment extends BaseFragment {
 
-    protected static final String TAG = ReadMmsFragment.class.getSimpleName();
+    protected static final String TAG = MmsConversationFragment.class.getSimpleName();
 
     private FragmentReadMmsBinding mBinding;
     private MmsViewModel mViewModel;
     private MmsConversationsAdapter mAdapter;
 
-    static ReadMmsFragment newInstance() {
+    static MmsConversationFragment newInstance() {
 
         Bundle args = new Bundle();
 
-        ReadMmsFragment fragment = new ReadMmsFragment();
+        MmsConversationFragment fragment = new MmsConversationFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,7 +51,7 @@ public class ReadMmsFragment extends BaseFragment {
         //Set title
         getActivity().setTitle(R.string.mms_conversations);
 
-        mViewModel = ((ReadMmsActivity) getActivity()).getViewModel();
+        mViewModel = ((MmsConversationActivity) getActivity()).getViewModel();
 
         setupUi();
         readMmsConversations();
