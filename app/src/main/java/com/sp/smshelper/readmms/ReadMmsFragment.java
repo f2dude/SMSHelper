@@ -9,10 +9,13 @@ import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.FragmentReadMmsBinding;
 import com.sp.smshelper.main.BaseFragment;
+import com.sp.smshelper.views.SimpleDividerItemDecoration;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -23,6 +26,7 @@ public class ReadMmsFragment extends BaseFragment {
 
     private FragmentReadMmsBinding mBinding;
     private MmsViewModel mViewModel;
+    private MmsConversationsAdapter mAdapter;
 
     static ReadMmsFragment newInstance() {
 
@@ -49,11 +53,28 @@ public class ReadMmsFragment extends BaseFragment {
 
         mViewModel = ((ReadMmsActivity) getActivity()).getViewModel();
 
+        setupUi();
         readMmsConversations();
     }
 
+    private void setupUi() {
+        //Bind RecyclerView
+        RecyclerView recyclerView = mBinding.mmsConversationsList;
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getContext(), R.drawable.item_divider));
+
+        mAdapter = new MmsConversationsAdapter();
+        recyclerView.setAdapter(mAdapter);
+    }
+
+    /**
+     * Reads MMS conversations and displays them on screen
+     */
     private void readMmsConversations() {
         Log.d(TAG, "readMmsConversations()");
         addToCompositeDisposable(mViewModel.getAllMmsConversations());
+        //Observe on data
+        mViewModel.watchMmsConversations().observe(getViewLifecycleOwner(), mmsConversations -> mAdapter.setData(mmsConversations));
     }
 }

@@ -153,7 +153,7 @@ public class ConversationsRepository extends BaseRepository{
                     smsMessage.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Sms.DATE))));
 
                     SmsMessage.MessageType type = null;
-                    switch (Integer.parseInt(cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Sms.TYPE)))) {
+                    switch (Integer.parseInt(getValue(cursor, Telephony.Sms.TYPE))) {
                         case Telephony.Sms.MESSAGE_TYPE_ALL:
                             type = SmsMessage.MessageType.ALL;
                             break;

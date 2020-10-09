@@ -19,6 +19,7 @@
     <dimen name="message_sent_top_margin">5dp</dimen>
     <dimen name="message_sent_text_size">16sp</dimen>
     <dimen name="message_delivered_top_margin">5dp</dimen>
-
+    <dimen name="mms_conversation_address">16sp</dimen>
+    <dimen name="mms_conversation_top_margin">8dp</dimen>
     <item name="send_sms_hor_guide" type="dimen" format="float">0.3</item>
 </resources>

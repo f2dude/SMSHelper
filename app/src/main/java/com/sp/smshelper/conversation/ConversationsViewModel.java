@@ -51,7 +51,7 @@ public class ConversationsViewModel extends ViewModel {
         this.mContext = context;
     }
 
-    protected Disposable getAllConversations() {
+    Disposable getAllConversations() {
 
         return Single.fromCallable(() -> {
             ConversationsRepository conversationsRepository = new ConversationsRepository();
@@ -65,7 +65,7 @@ public class ConversationsViewModel extends ViewModel {
                         error -> Log.e(TAG, "Error in readConversationsFromDb(): " + error));
     }
 
-    protected LiveData<List<Conversation>> watchConversations() {
+    LiveData<List<Conversation>> watchConversations() {
         return mMutableConversationData;
     }
 

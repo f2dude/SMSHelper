@@ -31,7 +31,8 @@ public class MmsRepository extends BaseRepository {
                 Telephony.Mms.DATE,
                 Telephony.Mms.READ,
                 Telephony.Mms.CONTENT_TYPE,
-                Telephony.Mms.TEXT_ONLY};
+                Telephony.Mms.TEXT_ONLY,
+                Telephony.Mms.MESSAGE_BOX};
         String selection = Telephony.Mms.THREAD_ID + " IS NOT NULL) GROUP BY (" + Telephony.Mms.THREAD_ID;
         Cursor cursor = contentResolver.query(Telephony.Mms.CONTENT_URI,
                 projection,
@@ -52,18 +53,42 @@ public class MmsRepository extends BaseRepository {
                         read = true;
                     }
                     mmsConversation.setRead(read);
-                    mmsConversation.setContentType(getValue(cursor, Telephony.Mms.CONTENT_TYPE));
                     String mmsId = getValue(cursor, Telephony.Mms._ID);
                     boolean textOnly = false;
                     if (Integer.parseInt(getValue(cursor, Telephony.Mms.TEXT_ONLY)) == 1) {//For text
                         textOnly = true;
                         //get text
-                        mmsConversation.setText(getMmsText(context, mmsId));
+                        mmsConversation.setText(getMmsText(context, mmsId, mmsConversation));
                     } else {//For everything else
-                        mmsConversation.setData(getMmsData(context, mmsId));
+                        mmsConversation.setData(getMmsData(context, mmsId, mmsConversation));
                     }
                     mmsConversation.setTextOnly(textOnly);
                     mmsConversation.setAddressList(getMmsAddress(context, mmsId));
+
+                    MmsConversation.MessageType type = null;
+                    switch (Integer.parseInt(getValue(cursor, Telephony.Mms.MESSAGE_BOX))) {
+                        case Telephony.Mms.MESSAGE_BOX_ALL:
+                            type = MmsConversation.MessageType.ALL;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_DRAFTS:
+                            type = MmsConversation.MessageType.DRAFT;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_FAILED:
+                            type = MmsConversation.MessageType.FAILED;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_INBOX:
+                            type = MmsConversation.MessageType.INBOX;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_OUTBOX:
+                            type = MmsConversation.MessageType.OUTBOX;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_SENT:
+                            type = MmsConversation.MessageType.SENT;
+                            break;
+                        default:
+                            break;
+                    }
+                    mmsConversation.setMessageBoxType(type);
 
                     mmsConversationList.add(mmsConversation);
                 }
@@ -85,7 +110,7 @@ public class MmsRepository extends BaseRepository {
      * @param mmsId   MMS id
      * @return MMS text
      */
-    private String getMmsText(Context context, String mmsId) {
+    private String getMmsText(Context context, String mmsId, MmsConversation mmsConversation) {
         StringBuilder sb = new StringBuilder();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part.TEXT};
@@ -103,6 +128,8 @@ public class MmsRepository extends BaseRepository {
                 while (cursor.moveToNext()) {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
                     if (contentType.equals("text/plain")) {
+                        mmsConversation.setContentType(contentType);
+
                         String text = getValue(cursor, Telephony.Mms.Part.TEXT);
                         sb.append(text);
                     }
@@ -159,7 +186,7 @@ public class MmsRepository extends BaseRepository {
         return addressList;
     }
 
-    private MmsConversation.Data getMmsData(Context context, String mmsId) {
+    private MmsConversation.Data getMmsData(Context context, String mmsId, MmsConversation mmsConversation) {
         MmsConversation.Data data = null;
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part._DATA};
@@ -177,6 +204,8 @@ public class MmsRepository extends BaseRepository {
                 while (cursor.moveToNext()) {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
                     if (!contentType.equals("application/smil")) {
+                        mmsConversation.setContentType(contentType);
+
                         data = new MmsConversation().new Data();
                         data.setContentType(contentType);
                         data.setDataPath(getValue(cursor, Telephony.Mms.Part._DATA));

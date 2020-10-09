@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="isSelected"
+            type="Boolean" />
+
+        <variable
+            name="mmsConversation"
+            type="com.sp.smshelper.model.MmsConversation" />
+
+        <import type="android.view.View" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/default_margin"
+        android:paddingTop="@dimen/mms_conversation_top_margin"
+        android:paddingEnd="@dimen/default_margin"
+        android:paddingBottom="@dimen/mms_conversation_top_margin">
+
+        <TextView
+            android:id="@+id/address"
+            android:layout_width="@dimen/zero_margin"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="@integer/mms_address_max_lines"
+            android:text="@{mmsConversation.addressString}"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/mms_conversation_address"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/contentType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mms_conversation_top_margin"
+            android:text="@{mmsConversation.contentType}"
+            android:textColor="@android:color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/address" />
+
+        <TextView
+            android:id="@+id/messageType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{mmsConversation.messageBoxType.name()}"
+            android:layout_marginTop="@dimen/mms_conversation_top_margin"
+            android:textColor="@android:color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/contentType" />
+
+        <ImageView
+            android:id="@+id/selection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="@{isSelected ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:srcCompat="@drawable/ic_check_box_checked_black" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

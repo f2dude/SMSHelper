@@ -4,6 +4,10 @@ import java.util.List;
 
 public class MmsConversation {
 
+    public enum MessageType {
+        ALL, DRAFT, FAILED, INBOX, OUTBOX, SENT
+    }
+
     private String threadId;
     private String date;
     private boolean read;
@@ -12,6 +16,7 @@ public class MmsConversation {
     private String text;
     private List<String> addressList;
     private Data data;
+    private MessageType messageBoxType;
 
     public String getThreadId() {
         return threadId;
@@ -65,6 +70,20 @@ public class MmsConversation {
         return addressList;
     }
 
+    public String getAddressString() {
+        StringBuilder sb = new StringBuilder();
+        if (addressList != null && !addressList.isEmpty()) {
+            int size = addressList.size();
+            for (int i = 0; i < size; i++) {
+                sb.append(addressList.get(i));
+                if (!((i +1) == size)) {
+                    sb.append(", ");
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     public void setAddressList(List<String> addressList) {
         this.addressList = addressList;
     }
@@ -75,6 +94,14 @@ public class MmsConversation {
 
     public void setData(Data data) {
         this.data = data;
+    }
+
+    public MessageType getMessageBoxType() {
+        return messageBoxType;
+    }
+
+    public void setMessageBoxType(MessageType messageBoxType) {
+        this.messageBoxType = messageBoxType;
     }
 
     public class Data {
