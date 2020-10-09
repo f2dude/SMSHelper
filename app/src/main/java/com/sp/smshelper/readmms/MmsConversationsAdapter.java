@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.sp.smshelper.databinding.MmsConversationItemBinding;
+import com.sp.smshelper.listeners.IListener;
 import com.sp.smshelper.model.MmsConversation;
 
 import java.util.List;
@@ -14,6 +15,11 @@ import java.util.List;
 public class MmsConversationsAdapter extends RecyclerView.Adapter<MmsConversationsAdapter.MmsConversationViewHolder> {
 
     private List<MmsConversation> mmsConversationList;
+    private IListener.IMmsConversationFragment mListener;
+
+    public MmsConversationsAdapter(IListener.IMmsConversationFragment listener) {
+        this.mListener = listener;
+    }
 
     @NonNull
     @Override
@@ -37,7 +43,7 @@ public class MmsConversationsAdapter extends RecyclerView.Adapter<MmsConversatio
         notifyDataSetChanged();
     }
 
-    static class MmsConversationViewHolder extends RecyclerView.ViewHolder {
+    class MmsConversationViewHolder extends RecyclerView.ViewHolder {
 
         private MmsConversationItemBinding mBinding;
 
@@ -48,6 +54,8 @@ public class MmsConversationsAdapter extends RecyclerView.Adapter<MmsConversatio
 
         void bind(MmsConversation mmsConversation) {
             mBinding.setMmsConversation(mmsConversation);
+            mBinding.setMmsConversationListener(mListener);
+            mBinding.setPosition(getAdapterPosition());
             mBinding.executePendingBindings();
         }
     }

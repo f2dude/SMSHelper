@@ -14,13 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.FragmentReadMmsBinding;
+import com.sp.smshelper.listeners.IListener;
 import com.sp.smshelper.main.BaseFragment;
+import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.views.SimpleDividerItemDecoration;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MmsConversationFragment extends BaseFragment {
+public class MmsConversationFragment extends BaseFragment implements IListener.IMmsConversationFragment {
 
     protected static final String TAG = MmsConversationFragment.class.getSimpleName();
 
@@ -64,7 +66,7 @@ public class MmsConversationFragment extends BaseFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getContext(), R.drawable.item_divider));
 
-        mAdapter = new MmsConversationsAdapter();
+        mAdapter = new MmsConversationsAdapter(this);
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -76,5 +78,10 @@ public class MmsConversationFragment extends BaseFragment {
         addToCompositeDisposable(mViewModel.getAllMmsConversations());
         //Observe on data
         mViewModel.watchMmsConversations().observe(getViewLifecycleOwner(), mmsConversations -> mAdapter.setData(mmsConversations));
+    }
+
+    @Override
+    public void onMmsConversationItemClick(MmsConversation mmsConversation, int position) {
+        Log.d(TAG, "onMmsConversationItemClick(), Position: " + position);
     }
 }

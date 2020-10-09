@@ -5,6 +5,10 @@
     <data>
 
         <variable
+            name="mmsConversationListener"
+            type="com.sp.smshelper.listeners.IListener.IMmsConversationFragment" />
+
+        <variable
             name="isSelected"
             type="Boolean" />
 
@@ -12,12 +16,17 @@
             name="mmsConversation"
             type="com.sp.smshelper.model.MmsConversation" />
 
+        <variable
+            name="position"
+            type="int" />
+
         <import type="android.view.View" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="@{() -> mmsConversationListener.onMmsConversationItemClick(mmsConversation, position)}"
         android:paddingStart="@dimen/default_margin"
         android:paddingTop="@dimen/mms_conversation_top_margin"
         android:paddingEnd="@dimen/default_margin"
@@ -51,8 +60,8 @@
             android:id="@+id/messageType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{mmsConversation.messageBoxType.name()}"
             android:layout_marginTop="@dimen/mms_conversation_top_margin"
+            android:text="@{mmsConversation.messageBoxType.name()}"
             android:textColor="@android:color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/contentType" />
