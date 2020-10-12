@@ -1,5 +1,7 @@
 package com.sp.smshelper.model;
 
+import java.util.List;
+
 public class BaseModel {
 
     private String threadId;
@@ -7,9 +9,8 @@ public class BaseModel {
     private String messageId;
     private boolean read;
     private String address;
-    private String contentType;
-    private Data data;
     private boolean textOnly;
+    private List<Data> dataList;
 
     public boolean isTextOnly() {
         return textOnly;
@@ -17,22 +18,6 @@ public class BaseModel {
 
     public void setTextOnly(boolean textOnly) {
         this.textOnly = textOnly;
-    }
-
-    public Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
     }
 
     public String getAddress() {
@@ -73,6 +58,22 @@ public class BaseModel {
 
     public void setThreadId(String threadId) {
         this.threadId = threadId;
+    }
+
+    public List<Data> getDataList() {
+        return dataList;
+    }
+
+    public void setDataList(List<Data> dataList) {
+        this.dataList = dataList;
+    }
+
+    public String getContentType() {
+        if (isTextOnly()) {
+            return "Text Content";
+        } else {
+            return getDataList() != null && !getDataList().isEmpty() ? getDataList().get(getDataList().size() - 1).getContentType() : "NULL";
+        }
     }
 
     public class Data {

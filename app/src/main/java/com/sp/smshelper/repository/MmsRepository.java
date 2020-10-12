@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.provider.Telephony;
 import android.util.Log;
 
-import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
 
@@ -54,9 +53,9 @@ public class MmsRepository extends BaseRepository {
                     if (Integer.parseInt(getValue(cursor, Telephony.Mms.TEXT_ONLY)) == 1) {//For text
                         textOnly = true;
                         //get text
-                        mmsConversation.setText(getMmsText(context, mmsId, mmsConversation));
+                        mmsConversation.setText(getMmsText(context, mmsId));
                     } else {//For everything else
-                        mmsConversation.setData(getMmsData(context, mmsId, mmsConversation));
+                        mmsConversation.setDataList(getMmsData(context, mmsId));
                     }
                     mmsConversation.setTextOnly(textOnly);
                     mmsConversation.setAddressList(getMmsAddress(context, mmsId));
@@ -137,9 +136,9 @@ public class MmsRepository extends BaseRepository {
                     if (Integer.parseInt(getValue(cursor, Telephony.Mms.TEXT_ONLY)) == 1) {//For text
                         textOnly = true;
                         //get text
-                        mmsMessage.setText(getMmsText(context, mmsId, mmsMessage));
+                        mmsMessage.setText(getMmsText(context, mmsId));
                     } else {//For everything else
-                        mmsMessage.setData(getMmsData(context, mmsId, mmsMessage));
+                        mmsMessage.setDataList(getMmsData(context, mmsId));
                     }
                     mmsMessage.setTextOnly(textOnly);
                     MmsConversation.MessageType type = null;
@@ -187,7 +186,7 @@ public class MmsRepository extends BaseRepository {
      * @param mmsId   MMS id
      * @return MMS text
      */
-    private String getMmsText(Context context, String mmsId, BaseModel mmsConversation) {
+    private String getMmsText(Context context, String mmsId) {
         StringBuilder sb = new StringBuilder();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part.TEXT};
@@ -205,8 +204,6 @@ public class MmsRepository extends BaseRepository {
                 while (cursor.moveToNext()) {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
                     if (contentType.equals("text/plain")) {
-                        mmsConversation.setContentType(contentType);
-
                         String text = getValue(cursor, Telephony.Mms.Part.TEXT);
                         sb.append(text);
                     }
@@ -263,8 +260,14 @@ public class MmsRepository extends BaseRepository {
         return addressList;
     }
 
-    private MmsConversation.Data getMmsData(Context context, String mmsId, BaseModel mmsConversation) {
-        MmsConversation.Data data = null;
+    /**
+     * Retrieves list of files associated with a message
+     * @param context Activity context
+     * @param mmsId MMS message Id
+     * @return Files list
+     */
+    private List<MmsConversation.Data> getMmsData(Context context, String mmsId) {
+        List<MmsConversation.Data> dataList = new ArrayList<>();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part._DATA};
         ContentResolver contentResolver = context.getContentResolver();
@@ -281,11 +284,12 @@ public class MmsRepository extends BaseRepository {
                 while (cursor.moveToNext()) {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
                     if (!contentType.equals("application/smil")) {
-                        mmsConversation.setContentType(contentType);
 
-                        data = new MmsConversation().new Data();
+                        MmsConversation.Data data = new MmsConversation().new Data();
                         data.setContentType(contentType);
                         data.setDataPath(getValue(cursor, Telephony.Mms.Part._DATA));
+
+                        dataList.add(data);
                     }
                 }
             }
@@ -296,6 +300,6 @@ public class MmsRepository extends BaseRepository {
                 cursor.close();
             }
         }
-        return data;
+        return dataList;
     }
 }

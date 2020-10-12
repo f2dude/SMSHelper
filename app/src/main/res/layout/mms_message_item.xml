@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="@integer/mms_address_max_lines"
-            android:text="@{mmsMessage.contentType}"
+            android:text="@{mmsMessage.contentType + ` - Files: `+ mmsMessage.dataList.size()}"
             android:textColor="@android:color/black"
             android:textSize="@dimen/mms_conversation_address"
             android:textStyle="bold"
