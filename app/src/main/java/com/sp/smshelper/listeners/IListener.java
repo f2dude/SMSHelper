@@ -16,4 +16,8 @@ public interface IListener {
     interface IMmsConversationFragment {
         void onMmsConversationItemClick(MmsConversation mmsConversation, int position);
     }
+
+    interface IMmsMessagesFragment {
+        void onMmsMessageItemClick(String messageId, int position);
+    }
 }

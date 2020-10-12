@@ -81,7 +81,7 @@ public class MmsViewModel extends ViewModel {
      * Method used to provide live updates on data
      * @return MMS message list
      */
-    LiveData<List<MmsMessage>> watchMmsMessages() {
+    public LiveData<List<MmsMessage>> watchMmsMessages() {
         return mMutableMmsMessages;
     }
 }

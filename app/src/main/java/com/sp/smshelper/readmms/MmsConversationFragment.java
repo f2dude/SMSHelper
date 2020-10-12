@@ -19,6 +19,8 @@ import com.sp.smshelper.main.BaseFragment;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.views.SimpleDividerItemDecoration;
 
+import java.util.Objects;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -83,5 +85,6 @@ public class MmsConversationFragment extends BaseFragment implements IListener.I
     @Override
     public void onMmsConversationItemClick(MmsConversation mmsConversation, int position) {
         Log.d(TAG, "onMmsConversationItemClick(), Position: " + position);
+        ((MmsConversationActivity) Objects.requireNonNull(getActivity())).startMmsMessagesFragment(mmsConversation.getThreadId());
     }
 }
