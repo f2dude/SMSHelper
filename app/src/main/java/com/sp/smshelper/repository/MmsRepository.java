@@ -234,7 +234,7 @@ public class MmsRepository extends BaseRepository {
                     }
                     mmsMessage.setMessageBoxType(type);
                     mmsMessage.setMessageContentType(getValue(cursor, Telephony.Mms.CONTENT_TYPE));
-                    mmsMessage.setDeliveryTime(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DELIVERY_TIME)) * 1000));
+                    mmsMessage.setDeliveryTime(getValue(cursor, Telephony.Mms.DELIVERY_TIME));
                     mmsMessage.setDateSent(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE_SENT)) * 1000));
                     mmsMessage.setCount(getValue(cursor, Telephony.Mms._COUNT));
                     mmsMessage.setContentClass(getValue(cursor, Telephony.Mms.CONTENT_CLASS));
