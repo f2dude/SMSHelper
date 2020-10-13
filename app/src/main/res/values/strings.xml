@@ -25,4 +25,9 @@
     <string name="delete">Delete</string>
     <string name="enter_destination_number">Enter destination number</string>
     <string name="not_available">Not available</string>
+    <string name="send_mms">Send MMS</string>
+    <string name="read_mms">Read MMS</string>
+    <string name="mms_conversations">MMS conversations</string>
+    <string name="mms_messages">MMS Messages</string>
+    <string name="mms_details">MMS details</string>
 </resources>

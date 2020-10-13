@@ -56,11 +56,10 @@ public class SmsReceiver extends BroadcastReceiver {
                     //Save the message in data base
                     ConversationsRepository conversationsRepository = new ConversationsRepository();
                     conversationsRepository.saveIncomingSmsMessage(context, address, message.toString(), isReplyPathPresent, subscription);
-                } else if (intent.getAction().equals("android.provider.Telephony.SMS_DELIVER")) {
-                    //Do nothing
                 }
+            }else if (intent.getAction().equals("android.provider.Telephony.SMS_DELIVER")) {
+                //Do nothing
             }
-
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
