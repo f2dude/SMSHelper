@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.provider.Telephony;
 import android.util.Log;
 
+import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
 
@@ -179,6 +180,134 @@ public class MmsRepository extends BaseRepository {
         return mmsMessageList;
     }
 
+    public MmsMessage getMmsMessageByMessageId(Context context, String messageId) {
+        Log.d(TAG, "getMmsMessageByMessageId(), Message id: " + messageId);
+
+        ContentResolver contentResolver = context.getContentResolver();
+        String selection = Telephony.Mms._ID + " = ?";
+        String[] selectionArgs = new String[]{messageId};
+        Cursor cursor = contentResolver.query(Telephony.Mms.CONTENT_URI,
+                null,
+                selection,
+                selectionArgs,
+                Telephony.Mms.DEFAULT_SORT_ORDER);
+        MmsMessage mmsMessage = new MmsMessage();
+        try {
+            if (null != cursor) {
+                Log.d(TAG, "getMmsMessageByMessageId(), Cursor count: " + cursor.getCount());
+                while (cursor.moveToNext()) {
+                    mmsMessage.setThreadId(getValue(cursor, Telephony.Mms.THREAD_ID));
+                    String mmsId = getValue(cursor, Telephony.Mms._ID);
+                    mmsMessage.setMessageId(mmsId);
+                    mmsMessage.setDate(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE)) * 1000));
+                    boolean textOnly = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.TEXT_ONLY)) == 1) {//For text
+                        textOnly = true;
+                        //get text
+                        mmsMessage.setText(getMmsText(context, mmsId));
+                    } else {//For everything else
+                        mmsMessage.setDataList(getMmsData(context, mmsId));
+                    }
+                    mmsMessage.setTextOnly(textOnly);
+                    MmsConversation.MessageType type = null;
+                    switch (Integer.parseInt(getValue(cursor, Telephony.Mms.MESSAGE_BOX))) {
+                        case Telephony.Mms.MESSAGE_BOX_ALL:
+                            type = MmsConversation.MessageType.ALL;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_DRAFTS:
+                            type = MmsConversation.MessageType.DRAFT;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_FAILED:
+                            type = MmsConversation.MessageType.FAILED;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_INBOX:
+                            type = MmsConversation.MessageType.INBOX;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_OUTBOX:
+                            type = MmsConversation.MessageType.OUTBOX;
+                            break;
+                        case Telephony.Mms.MESSAGE_BOX_SENT:
+                            type = MmsConversation.MessageType.SENT;
+                            break;
+                        default:
+                            break;
+                    }
+                    mmsMessage.setMessageBoxType(type);
+                    mmsMessage.setMessageContentType(getValue(cursor, Telephony.Mms.CONTENT_TYPE));
+                    mmsMessage.setDeliveryTime(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DELIVERY_TIME)) * 1000));
+                    mmsMessage.setDateSent(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE_SENT)) * 1000));
+                    mmsMessage.setCount(getValue(cursor, Telephony.Mms._COUNT));
+                    mmsMessage.setContentClass(getValue(cursor, Telephony.Mms.CONTENT_CLASS));
+                    mmsMessage.setContentLocation(getValue(cursor, Telephony.Mms.CONTENT_LOCATION));
+                    mmsMessage.setCreator(getValue(cursor, Telephony.Mms.CREATOR));
+                    mmsMessage.setDeliveryReport(getValue(cursor, Telephony.Mms.DELIVERY_REPORT));
+                    mmsMessage.setExpiry(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.EXPIRY))));
+
+                    boolean locked = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.LOCKED)) == 1) {
+                        locked = true;
+                    }
+                    mmsMessage.setLocked(locked);
+
+                    mmsMessage.setMessageClass(getValue(cursor, Telephony.Mms.MESSAGE_CLASS));
+                    mmsMessage.setMmsMessageId(getValue(cursor, Telephony.Mms.MESSAGE_ID));
+                    mmsMessage.setMessageSize(getValue(cursor, Telephony.Mms.MESSAGE_SIZE));
+                    mmsMessage.setMessageType(getValue(cursor, Telephony.Mms.MESSAGE_TYPE));
+                    mmsMessage.setMmsVersion(getValue(cursor, Telephony.Mms.MMS_VERSION));
+                    mmsMessage.setPriority(getValue(cursor, Telephony.Mms.PRIORITY));
+
+                    boolean read = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ)) == 1) {
+                        read = true;
+                    }
+                    mmsMessage.setRead(read);
+
+                    boolean readReport = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ_REPORT)) == 1) {
+                        readReport = true;
+                    }
+                    mmsMessage.setReadReport(readReport);
+
+                    boolean readStatus = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ_STATUS)) == 1) {
+                        readStatus = true;
+                    }
+                    mmsMessage.setReadStatus(readStatus);
+
+                    boolean reportAllowed = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.REPORT_ALLOWED)) == 1) {
+                        reportAllowed = true;
+                    }
+                    mmsMessage.setReportAllowed(reportAllowed);
+                    mmsMessage.setResponseStatus(getValue(cursor, Telephony.Mms.RESPONSE_STATUS));
+                    mmsMessage.setResponseText(getValue(cursor, Telephony.Mms.RESPONSE_TEXT));
+                    mmsMessage.setRetrieveStatus(getValue(cursor, Telephony.Mms.RETRIEVE_STATUS));
+                    mmsMessage.setRetrieveText(getValue(cursor, Telephony.Mms.RETRIEVE_TEXT));
+                    mmsMessage.setRetrieveTextCharset(getValue(cursor, Telephony.Mms.RETRIEVE_TEXT_CHARSET));
+
+                    boolean isSeen = false;
+                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.SEEN)) == 1) {
+                        isSeen = true;
+                    }
+                    mmsMessage.setSeen(isSeen);
+
+                    mmsMessage.setStatus(getValue(cursor, Telephony.Mms.STATUS));
+                    mmsMessage.setSubject(getValue(cursor, Telephony.Mms.SUBJECT));
+                    mmsMessage.setSubjectCharset(getValue(cursor, Telephony.Mms.SUBJECT_CHARSET));
+                    mmsMessage.setSubscriptionId(getValue(cursor, Telephony.Mms.SUBSCRIPTION_ID));
+                    mmsMessage.setTransactionId(getValue(cursor, Telephony.Mms.TRANSACTION_ID));
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in getMmsMessageByMessageId(): " + e);
+        } finally {
+            if (null != cursor) {
+                cursor.close();
+            }
+        }
+        return mmsMessage;
+    }
+
     /**
      * Returns MMS text associated with MMS message
      *
@@ -262,12 +391,13 @@ public class MmsRepository extends BaseRepository {
 
     /**
      * Retrieves list of files associated with a message
+     *
      * @param context Activity context
-     * @param mmsId MMS message Id
+     * @param mmsId   MMS message Id
      * @return Files list
      */
     private List<MmsConversation.Data> getMmsData(Context context, String mmsId) {
-        List<MmsConversation.Data> dataList = new ArrayList<>();
+        List<BaseModel.Data> dataList = new ArrayList<>();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
                 Telephony.Mms.Part._DATA};
         ContentResolver contentResolver = context.getContentResolver();
@@ -285,7 +415,7 @@ public class MmsRepository extends BaseRepository {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
                     if (!contentType.equals("application/smil")) {
 
-                        MmsConversation.Data data = new MmsConversation().new Data();
+                        BaseModel.Data data = new BaseModel().new Data();
                         data.setContentType(contentType);
                         data.setDataPath(getValue(cursor, Telephony.Mms.Part._DATA));
 

@@ -29,4 +29,5 @@
     <string name="read_mms">Read MMS</string>
     <string name="mms_conversations">MMS conversations</string>
     <string name="mms_messages">MMS Messages</string>
+    <string name="mms_details">MMS details</string>
 </resources>

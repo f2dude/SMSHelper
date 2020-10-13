@@ -11,6 +11,9 @@ public class BaseModel {
     private String address;
     private boolean textOnly;
     private List<Data> dataList;
+    private boolean locked;
+    private boolean seen;
+    private String subscriptionId;
 
     public boolean isTextOnly() {
         return textOnly;
@@ -74,6 +77,30 @@ public class BaseModel {
         } else {
             return getDataList() != null && !getDataList().isEmpty() ? getDataList().get(getDataList().size() - 1).getContentType() : "NULL";
         }
+    }
+
+    public boolean getLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public boolean isSeen() {
+        return seen;
+    }
+
+    public void setSeen(boolean seen) {
+        this.seen = seen;
+    }
+
+    public String getSubscriptionId() {
+        return subscriptionId;
+    }
+
+    public void setSubscriptionId(String subscriptionId) {
+        this.subscriptionId = subscriptionId;
     }
 
     public class Data {

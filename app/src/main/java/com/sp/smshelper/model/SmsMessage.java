@@ -19,10 +19,7 @@ public class SmsMessage extends BaseModel{
     private String creator;
     private String dateSent;
     private String errorCode;
-    private boolean locked;
     private String person;
-    private String subscriptionId;
-    private boolean seen;
 
     public String getCreator() {
         return creator;
@@ -46,14 +43,6 @@ public class SmsMessage extends BaseModel{
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
-    }
-
-    public boolean getLocked() {
-        return locked;
-    }
-
-    public void setLocked(boolean locked) {
-        this.locked = locked;
     }
 
     public String getPerson() {
@@ -110,21 +99,5 @@ public class SmsMessage extends BaseModel{
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public String getSubscriptionId() {
-        return subscriptionId;
-    }
-
-    public void setSubscriptionId(String subscriptionId) {
-        this.subscriptionId = subscriptionId;
-    }
-
-    public boolean isSeen() {
-        return seen;
-    }
-
-    public void setSeen(boolean seen) {
-        this.seen = seen;
     }
 }

@@ -21,6 +21,8 @@ import com.sp.smshelper.readmms.MmsConversationActivity;
 import com.sp.smshelper.readmms.MmsViewModel;
 import com.sp.smshelper.views.SimpleDividerItemDecoration;
 
+import java.util.Objects;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -59,7 +61,7 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         //Set title
-        getActivity().setTitle(R.string.mms_messages);
+        Objects.requireNonNull(getActivity()).setTitle(R.string.mms_messages);
 
         mViewModel = ((MmsConversationActivity) getActivity()).getViewModel();
 
@@ -98,5 +100,6 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
     @Override
     public void onMmsMessageItemClick(String messageId, int position) {
         Log.d(TAG, "onMmsMessageItemClick(), Position: " + position);
+        ((MmsConversationActivity) Objects.requireNonNull(getActivity())).startMmsDetailsFragment(messageId);
     }
 }

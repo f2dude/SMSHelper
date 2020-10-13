@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.ActivityReadMmsBinding;
+import com.sp.smshelper.mmsmessages.MmsDetailsFragment;
 import com.sp.smshelper.mmsmessages.MmsMessagesFragment;
 
 public class MmsConversationActivity extends AppCompatActivity {
@@ -50,6 +51,20 @@ public class MmsConversationActivity extends AppCompatActivity {
                         MmsMessagesFragment.newInstance(threadId),
                         MmsMessagesFragment.TAG)
                 .addToBackStack(MmsMessagesFragment.TAG)
+                .commit();
+    }
+
+    /**
+     * Starts MMS details fragment
+     * @param messageId
+     */
+    public void startMmsDetailsFragment(String messageId) {
+        //Fragment transaction
+        getSupportFragmentManager().beginTransaction()
+                .replace(mBinding.actionContainer.getId(),
+                        MmsDetailsFragment.newInstance(messageId),
+                        MmsDetailsFragment.TAG)
+                .addToBackStack(MmsDetailsFragment.TAG)
                 .commit();
     }
 
