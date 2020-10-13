@@ -107,6 +107,7 @@ public class BaseModel {
 
         private String dataPath;
         private String contentType;
+        private String text;
 
         public String getDataPath() {
             return dataPath;
@@ -122,6 +123,14 @@ public class BaseModel {
 
         public void setContentType(String contentType) {
             this.contentType = contentType;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
         }
     }
 }

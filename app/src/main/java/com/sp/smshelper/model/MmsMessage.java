@@ -7,7 +7,6 @@ public class MmsMessage extends BaseModel{
     private String messageContentType;//Do not use this for finding out media type.
     private String deliveryTime;
     private String dateSent;
-    private String count;
     private String contentClass;
     private String contentLocation;
     private String creator;
@@ -20,7 +19,7 @@ public class MmsMessage extends BaseModel{
     private String mmsVersion;
     private String priority;
     private boolean readReport;
-    private boolean readStatus;
+    private String readStatus;
     private boolean reportAllowed;
     private String responseStatus;
     private String responseText;
@@ -70,14 +69,6 @@ public class MmsMessage extends BaseModel{
 
     public void setDateSent(String dateSent) {
         this.dateSent = dateSent;
-    }
-
-    public String getCount() {
-        return count;
-    }
-
-    public void setCount(String count) {
-        this.count = count;
     }
 
     public String getContentClass() {
@@ -176,14 +167,6 @@ public class MmsMessage extends BaseModel{
         this.readReport = readReport;
     }
 
-    public boolean isReadStatus() {
-        return readStatus;
-    }
-
-    public void setReadStatus(boolean readStatus) {
-        this.readStatus = readStatus;
-    }
-
     public boolean isReportAllowed() {
         return reportAllowed;
     }
@@ -262,5 +245,13 @@ public class MmsMessage extends BaseModel{
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getReadStatus() {
+        return readStatus;
+    }
+
+    public void setReadStatus(String readStatus) {
+        this.readStatus = readStatus;
     }
 }

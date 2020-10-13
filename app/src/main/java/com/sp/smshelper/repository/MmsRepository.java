@@ -5,11 +5,13 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Telephony;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
+import com.sp.smshelper.utils.ContentType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -236,12 +238,14 @@ public class MmsRepository extends BaseRepository {
                     mmsMessage.setMessageContentType(getValue(cursor, Telephony.Mms.CONTENT_TYPE));
                     mmsMessage.setDeliveryTime(getValue(cursor, Telephony.Mms.DELIVERY_TIME));
                     mmsMessage.setDateSent(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE_SENT)) * 1000));
-                    mmsMessage.setCount(getValue(cursor, Telephony.Mms._COUNT));
                     mmsMessage.setContentClass(getValue(cursor, Telephony.Mms.CONTENT_CLASS));
                     mmsMessage.setContentLocation(getValue(cursor, Telephony.Mms.CONTENT_LOCATION));
                     mmsMessage.setCreator(getValue(cursor, Telephony.Mms.CREATOR));
                     mmsMessage.setDeliveryReport(getValue(cursor, Telephony.Mms.DELIVERY_REPORT));
-                    mmsMessage.setExpiry(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.EXPIRY))));
+                    String expiry = getValue(cursor, Telephony.Mms.EXPIRY);
+                    if (!TextUtils.isEmpty(expiry)) {
+                        mmsMessage.setExpiry(getFormattedDate(Long.parseLong(expiry)));
+                    }
 
                     boolean locked = false;
                     if (Integer.parseInt(getValue(cursor, Telephony.Mms.LOCKED)) == 1) {
@@ -263,19 +267,17 @@ public class MmsRepository extends BaseRepository {
                     mmsMessage.setRead(read);
 
                     boolean readReport = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ_REPORT)) == 1) {
+                    String readReportValue = getValue(cursor, Telephony.Mms.READ_REPORT);
+                    if (!TextUtils.isEmpty(readReportValue) && Integer.parseInt(readReportValue) == 1) {
                         readReport = true;
                     }
                     mmsMessage.setReadReport(readReport);
 
-                    boolean readStatus = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ_STATUS)) == 1) {
-                        readStatus = true;
-                    }
-                    mmsMessage.setReadStatus(readStatus);
+                    mmsMessage.setReadStatus(getValue(cursor, Telephony.Mms.READ_STATUS));
 
                     boolean reportAllowed = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.REPORT_ALLOWED)) == 1) {
+                    String reportAllowedValue = getValue(cursor, Telephony.Mms.REPORT_ALLOWED);
+                    if (!TextUtils.isEmpty(reportAllowedValue) && Integer.parseInt(reportAllowedValue) == 1) {
                         reportAllowed = true;
                     }
                     mmsMessage.setReportAllowed(reportAllowed);
@@ -399,13 +401,14 @@ public class MmsRepository extends BaseRepository {
     private List<MmsConversation.Data> getMmsData(Context context, String mmsId) {
         List<BaseModel.Data> dataList = new ArrayList<>();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
-                Telephony.Mms.Part._DATA};
+                Telephony.Mms.Part._DATA,
+                Telephony.Mms.Part.TEXT};
         ContentResolver contentResolver = context.getContentResolver();
         String selection = Telephony.Mms.Part.MSG_ID + " = ?";
         String[] selectionArgs = new String[]{mmsId};
         Uri uri = Uri.withAppendedPath(Telephony.Mms.CONTENT_URI, "part");
         Cursor cursor = contentResolver.query(uri,
-                projection,
+                null,
                 selection,
                 selectionArgs,
                 null);
@@ -413,11 +416,18 @@ public class MmsRepository extends BaseRepository {
             if (null != cursor) {
                 while (cursor.moveToNext()) {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
-                    if (!contentType.equals("application/smil")) {
 
-                        BaseModel.Data data = new BaseModel().new Data();
+                    BaseModel.Data data = null;
+                    if (ContentType.isSupportedImageType(contentType)) {
+                        data = new BaseModel().new Data();
                         data.setContentType(contentType);
                         data.setDataPath(getValue(cursor, Telephony.Mms.Part._DATA));
+
+                        dataList.add(data);
+                    } else if (ContentType.isTextType(contentType)) {
+                        data = new BaseModel().new Data();
+                        data.setContentType(contentType);
+                        data.setText(getValue(cursor, Telephony.Mms.Part.TEXT));
 
                         dataList.add(data);
                     }

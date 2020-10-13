@@ -150,8 +150,6 @@ public class MmsViewModel extends ViewModel {
         sb.append(newLine);
         sb.append("Date sent: " + mmsMessage.getDateSent());
         sb.append(newLine);
-        sb.append("Count: " + mmsMessage.getCount());
-        sb.append(newLine);
         sb.append("Content class: " + mmsMessage.getContentClass());
         sb.append(newLine);
         sb.append("Content location: " + mmsMessage.getContentLocation());
@@ -180,7 +178,7 @@ public class MmsViewModel extends ViewModel {
         sb.append(newLine);
         sb.append("Read report: " + mmsMessage.isReadReport());
         sb.append(newLine);
-        sb.append("Read status: " + mmsMessage.isReadStatus());
+        sb.append("Read status: " + mmsMessage.getReadStatus());
         sb.append(newLine);
         sb.append("Report allowed: " + mmsMessage.isReportAllowed());
         sb.append(newLine);
