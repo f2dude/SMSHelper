@@ -138,8 +138,10 @@ public class MmsViewModel extends ViewModel {
         sb.append(newLine);
         sb.append("Text: " + mmsMessage.getText());
         sb.append(newLine);
-        sb.append("No. of files: " + mmsMessage.getDataList().size());
-        sb.append(newLine);
+        if (!mmsMessage.isTextOnly()) {
+            sb.append("No. of files: " + mmsMessage.getDataList().size());
+            sb.append(newLine);
+        }
         sb.append("Message box type: " + mmsMessage.getMessageBoxType().name());
         sb.append(newLine);
         sb.append("MMS content type: " + mmsMessage.getMessageContentType());
