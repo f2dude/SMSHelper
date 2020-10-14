@@ -408,7 +408,7 @@ public class MmsRepository extends BaseRepository {
         String[] selectionArgs = new String[]{mmsId};
         Uri uri = Uri.withAppendedPath(Telephony.Mms.CONTENT_URI, "part");
         Cursor cursor = contentResolver.query(uri,
-                null,
+                projection,
                 selection,
                 selectionArgs,
                 null);
