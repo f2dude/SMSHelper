@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sp.smshelper">
-    
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -41,7 +41,9 @@
                 <data android:scheme="mms" />
                 <data android:scheme="mmsto" />
             </intent-filter>
-        </activity> <!-- BroadcastReceiver that listens for incoming SMS messages -->
+        </activity>
+        <activity android:name=".sendmms.SendMmsActivity" />
+        <!-- BroadcastReceiver that listens for incoming SMS messages -->
         <receiver
             android:name=".receivesms.SmsReceiver"
             android:enabled="true"
@@ -79,6 +81,7 @@
                 <data android:scheme="mmsto" />
             </intent-filter>
         </service>
+
         <receiver
             android:name=".receivesms.MmsReceivedReceiver"
             android:enabled="true"
@@ -87,6 +90,7 @@
                 <action android:name="com.sp.smshelper.receivesms.MMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
         <provider
             android:name=".provider.MmsFileProvider"
             android:authorities="${applicationId}.provider.MmsFileProvider"

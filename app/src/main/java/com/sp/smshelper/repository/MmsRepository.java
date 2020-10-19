@@ -17,6 +17,7 @@ import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
 import com.sp.smshelper.pdu_utils.ContentType;
 import com.sp.smshelper.pdu_utils.MmsException;
+import com.sp.smshelper.pdu_utils.PduHeaders;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -151,6 +152,8 @@ public class MmsRepository extends BaseRepository {
                         mmsMessage.setDataList(getMmsData(context, mmsId));
                     }
                     mmsMessage.setTextOnly(textOnly);
+                    mmsMessage.setAddressList(getMmsAddress(context, mmsId));
+
                     MmsConversation.MessageType type = null;
                     switch (Integer.parseInt(getValue(cursor, Telephony.Mms.MESSAGE_BOX))) {
                         case Telephony.Mms.MESSAGE_BOX_ALL:
@@ -367,7 +370,8 @@ public class MmsRepository extends BaseRepository {
     private List<String> getMmsAddress(Context context, String mmsId) {
         List<String> addressList = new ArrayList<>();
         ContentResolver contentResolver = context.getContentResolver();
-        String[] projection = {Telephony.Mms.Addr.ADDRESS};
+        String[] projection = {Telephony.Mms.Addr.ADDRESS,
+                Telephony.Mms.Addr.TYPE};
         String selection = Telephony.Mms.Addr.MSG_ID + " = ?";
         String[] selectionArgs = new String[]{mmsId};
 
@@ -384,7 +388,25 @@ public class MmsRepository extends BaseRepository {
                 while (cursor.moveToNext()) {
                     String address = getValue(cursor, Telephony.Mms.Addr.ADDRESS);
                     if (!address.equals("insert-address-token")) {
-                        addressList.add(address);
+                        String type = getValue(cursor, Telephony.Mms.Addr.TYPE);
+                        String header = null;
+                        switch (Integer.parseInt(type)) {
+                            case PduHeaders.TO:
+                                header = "To";
+                                break;
+                            case PduHeaders.FROM:
+                                header = "From";
+                                break;
+                            case PduHeaders.CC:
+                                header = "CC";
+                                break;
+                            case PduHeaders.BCC:
+                                header = "BCC";
+                                break;
+                            default:
+                                break;
+                        }
+                        addressList.add(header + " : " + address);
                     }
                 }
             }
