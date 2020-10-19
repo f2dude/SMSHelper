@@ -20,7 +20,7 @@
 
         <import type="android.view.View" />
 
-        <import type="com.sp.smshelper.utils.ContentType" />
+        <import type="com.sp.smshelper.pdu_utils.ContentType" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

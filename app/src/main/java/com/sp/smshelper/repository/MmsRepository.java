@@ -15,8 +15,8 @@ import android.util.Log;
 import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
-import com.sp.smshelper.utils.ContentType;
-import com.sp.smshelper.utils.MmsException;
+import com.sp.smshelper.pdu_utils.ContentType;
+import com.sp.smshelper.pdu_utils.MmsException;
 
 import java.io.IOException;
 import java.io.InputStream;

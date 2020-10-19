@@ -5,7 +5,7 @@ import android.drm.DrmConvertedStatus;
 import android.drm.DrmManagerClient;
 import android.util.Log;
 
-import com.sp.smshelper.utils.Downloads;
+import com.sp.smshelper.pdu_utils.Downloads;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

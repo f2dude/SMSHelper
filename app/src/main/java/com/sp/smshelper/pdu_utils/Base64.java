@@ -1,4 +1,4 @@
-package com.sp.smshelper.utils;
+package com.sp.smshelper.pdu_utils;
 
 public class Base64 {
     /**

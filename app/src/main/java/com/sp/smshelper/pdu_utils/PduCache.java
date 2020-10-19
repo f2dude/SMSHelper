@@ -1,4 +1,4 @@
-package com.sp.smshelper.utils;
+package com.sp.smshelper.pdu_utils;
 
 import android.content.ContentUris;
 import android.content.UriMatcher;

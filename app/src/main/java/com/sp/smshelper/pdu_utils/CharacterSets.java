@@ -1,4 +1,4 @@
-package com.sp.smshelper.utils;
+package com.sp.smshelper.pdu_utils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;

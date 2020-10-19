@@ -15,8 +15,8 @@ import android.telephony.SmsManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sp.smshelper.pdu_utils.MmsConfig;
 import com.sp.smshelper.repository.BroadcastUtils;
-import com.sp.smshelper.utils.MmsConfig;
 
 import java.io.File;
 import java.util.Random;
