@@ -3,26 +3,15 @@ package com.sp.smshelper.utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.Uri;
-import android.os.Build;
 import android.preference.PreferenceManager;
-import android.provider.Telephony;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -51,7 +40,7 @@ public class Utils {
      * @param context is the context of the activity or service
      * @return a string of the phone number on the device
      */
-    public static String getMyPhoneNumber(Context context) {
+    private static String getMyPhoneNumber(Context context) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
             TelephonyManager mTelephonyMgr;
             mTelephonyMgr = (TelephonyManager)
@@ -137,43 +126,43 @@ public class Utils {
      * @param proxy   is the proxy of the APN to check
      * @throws java.io.IOException when route cannot be established
      */
-    public static void ensureRouteToHost(Context context, String url, String proxy) throws IOException {
-        ConnectivityManager connMgr =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        InetAddress inetAddr;
-        if (proxy != null && proxy.trim().length() != 0) {
-            try {
-                inetAddr = InetAddress.getByName(proxy);
-            } catch (UnknownHostException e) {
-                throw new IOException("Cannot establish route for " + url +
-                        ": Unknown proxy " + proxy);
-            }
-            try {
-                Method requestRoute = ConnectivityManager.class.getMethod("requestRouteToHostAddress", Integer.TYPE, InetAddress.class);
-                if (!((Boolean) requestRoute.invoke(connMgr, ConnectivityManager.TYPE_MOBILE_MMS, inetAddr))) {
-                    throw new IOException("Cannot establish route to proxy " + inetAddr);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Cannot establishh route to proxy " + inetAddr, e);
-            }
-        } else {
-            Uri uri = Uri.parse(url);
-            try {
-                inetAddr = InetAddress.getByName(uri.getHost());
-            } catch (UnknownHostException e) {
-                throw new IOException("Cannot establish route for " + url + ": Unknown host");
-            }
-            try {
-                Method requestRoute = ConnectivityManager.class.getMethod("requestRouteToHostAddress", Integer.TYPE, InetAddress.class);
-                if (!((Boolean) requestRoute.invoke(connMgr, ConnectivityManager.TYPE_MOBILE_MMS, inetAddr))) {
-                    throw new IOException("Cannot establish route to proxy " + inetAddr);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Cannot establishh route to proxy " + inetAddr + " for " + url, e);
-            }
-        }
-    }
+//    public static void ensureRouteToHost(Context context, String url, String proxy) throws IOException {
+//        ConnectivityManager connMgr =
+//                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//
+//        InetAddress inetAddr;
+//        if (proxy != null && proxy.trim().length() != 0) {
+//            try {
+//                inetAddr = InetAddress.getByName(proxy);
+//            } catch (UnknownHostException e) {
+//                throw new IOException("Cannot establish route for " + url +
+//                        ": Unknown proxy " + proxy);
+//            }
+//            try {
+//                Method requestRoute = ConnectivityManager.class.getMethod("requestRouteToHostAddress", Integer.TYPE, InetAddress.class);
+//                if (!((Boolean) requestRoute.invoke(connMgr, ConnectivityManager.TYPE_MOBILE_MMS, inetAddr))) {
+//                    throw new IOException("Cannot establish route to proxy " + inetAddr);
+//                }
+//            } catch (Exception e) {
+//                Log.e(TAG, "Cannot establishh route to proxy " + inetAddr, e);
+//            }
+//        } else {
+//            Uri uri = Uri.parse(url);
+//            try {
+//                inetAddr = InetAddress.getByName(uri.getHost());
+//            } catch (UnknownHostException e) {
+//                throw new IOException("Cannot establish route for " + url + ": Unknown host");
+//            }
+//            try {
+//                Method requestRoute = ConnectivityManager.class.getMethod("requestRouteToHostAddress", Integer.TYPE, InetAddress.class);
+//                if (!((Boolean) requestRoute.invoke(connMgr, ConnectivityManager.TYPE_MOBILE_MMS, inetAddr))) {
+//                    throw new IOException("Cannot establish route to proxy " + inetAddr);
+//                }
+//            } catch (Exception e) {
+//                Log.e(TAG, "Cannot establishh route to proxy " + inetAddr + " for " + url, e);
+//            }
+//        }
+//    }
 
     /**
      * Checks whether or not mobile data is enabled and returns the result
@@ -181,35 +170,35 @@ public class Utils {
      * @param context is the context of the activity or service
      * @return true if data is enabled or false if disabled
      */
-    public static Boolean isMobileDataEnabled(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        try {
-            Class<?> c = Class.forName(cm.getClass().getName());
-            Method m = c.getDeclaredMethod("getMobileDataEnabled");
-            m.setAccessible(true);
-            return (Boolean) m.invoke(cm);
-        } catch (Exception e) {
-            Log.e(TAG, "exception thrown", e);
-            return null;
-        }
-    }
+//    public static Boolean isMobileDataEnabled(Context context) {
+//        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//
+//        try {
+//            Class<?> c = Class.forName(cm.getClass().getName());
+//            Method m = c.getDeclaredMethod("getMobileDataEnabled");
+//            m.setAccessible(true);
+//            return (Boolean) m.invoke(cm);
+//        } catch (Exception e) {
+//            Log.e(TAG, "exception thrown", e);
+//            return null;
+//        }
+//    }
 
     /**
      * Checks mobile data enabled based on telephonymanager
      *
      * @param telephonyManager the telephony manager
      */
-    public static boolean isDataEnabled(TelephonyManager telephonyManager) {
-        try {
-            Class<?> c = telephonyManager.getClass();
-            Method m = c.getMethod("getDataEnabled");
-            return (boolean) m.invoke(telephonyManager);
-        } catch (Exception e) {
-            Log.e(TAG, "exception thrown", e);
-            return true;
-        }
-    }
+//    public static boolean isDataEnabled(TelephonyManager telephonyManager) {
+//        try {
+//            Class<?> c = telephonyManager.getClass();
+//            Method m = c.getMethod("getDataEnabled");
+//            return (boolean) m.invoke(telephonyManager);
+//        } catch (Exception e) {
+//            Log.e(TAG, "exception thrown", e);
+//            return true;
+//        }
+//    }
 
 //    /**
 //     * Toggles mobile data
@@ -333,56 +322,47 @@ public class Utils {
      * @param telephonyManager the telephony manager
      * @param subId            the sim card id
      */
-    public static boolean isDataEnabled(TelephonyManager telephonyManager, int subId) {
-        try {
-            Class<?> c = telephonyManager.getClass();
-            Method m = c.getMethod("getDataEnabled", int.class);
-            return (boolean) m.invoke(telephonyManager, subId);
-        } catch (Exception e) {
-            Log.e(TAG, "exception thrown", e);
-            return isDataEnabled(telephonyManager);
-        }
-    }
+//    public static boolean isDataEnabled(TelephonyManager telephonyManager, int subId) {
+//        try {
+//            Class<?> c = telephonyManager.getClass();
+//            Method m = c.getMethod("getDataEnabled", int.class);
+//            return (boolean) m.invoke(telephonyManager, subId);
+//        } catch (Exception e) {
+//            Log.e(TAG, "exception thrown", e);
+//            return isDataEnabled(telephonyManager);
+//        }
+//    }
 
-    public static boolean doesThreadIdExist(Context context, long threadId) {
-        Uri uri = Uri.parse("content://mms-sms/conversations/" + threadId + "/");
+//    public static boolean doesThreadIdExist(Context context, long threadId) {
+//        Uri uri = Uri.parse("content://mms-sms/conversations/" + threadId + "/");
+//
+//        Cursor cursor = context.getContentResolver().query(uri, new String[]{"_id"}, null, null, null);
+//        if (cursor != null && cursor.moveToFirst()) {
+//            cursor.close();
+//            return true;
+//        } else {
+//            return false;
+//        }
+//    }
 
-        Cursor cursor = context.getContentResolver().query(uri, new String[]{"_id"}, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            cursor.close();
-            return true;
-        } else {
-            return false;
-        }
-    }
+//    private static boolean isEmailAddress(String address) {
+//        if (TextUtils.isEmpty(address)) {
+//            return false;
+//        }
+//
+//        String s = extractAddrSpec(address);
+//        Matcher match = EMAIL_ADDRESS_PATTERN.matcher(s);
+//        return match.matches();
+//    }
 
-    private static boolean isEmailAddress(String address) {
-        if (TextUtils.isEmpty(address)) {
-            return false;
-        }
-
-        String s = extractAddrSpec(address);
-        Matcher match = EMAIL_ADDRESS_PATTERN.matcher(s);
-        return match.matches();
-    }
-
-    private static String extractAddrSpec(String address) {
-        Matcher match = NAME_ADDR_EMAIL_PATTERN.matcher(address);
-
-        if (match.matches()) {
-            return match.group(2);
-        }
-        return address;
-    }
-
-    /**
-     * Determines whether or not the user has Android 4.4 KitKat
-     *
-     * @return true if version code on device is >= kitkat
-     */
-    public static boolean hasKitKat() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-    }
+//    private static String extractAddrSpec(String address) {
+//        Matcher match = NAME_ADDR_EMAIL_PATTERN.matcher(address);
+//
+//        if (match.matches()) {
+//            return match.group(2);
+//        }
+//        return address;
+//    }
 
     /**
      * Gets the default settings from a shared preferences file associated with your app
@@ -412,20 +392,6 @@ public class Utils {
 //    }
 
     /**
-     * Determines whether or not the app is the default SMS app on a device
-     *
-     * @param context
-     * @return true if app is default
-     */
-    public static boolean isDefaultSmsApp(Context context) {
-        if (hasKitKat()) {
-            return context.getPackageName().equals(Telephony.Sms.getDefaultSmsPackage(context));
-        }
-
-        return true;
-    }
-
-    /**
      * Determines whether or not the app has enabled MMS over WiFi
      *
      * @param context
@@ -436,14 +402,6 @@ public class Utils {
     }
 
     public static int getDefaultSubscriptionId() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            return SmsManager.getDefaultSmsSubscriptionId();
-        } else {
-            return DEFAULT_SUBSCRIPTION_ID;
-        }
-    }
-
-    public interface Task<T> {
-        T run() throws IOException;
+        return SmsManager.getDefaultSmsSubscriptionId();
     }
 }
