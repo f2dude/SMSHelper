@@ -26,10 +26,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="@{() -> mmsMessageListener.onMmsMessageItemClick(mmsMessage.messageId, position)}"
         android:paddingStart="@dimen/default_margin"
         android:paddingTop="@dimen/mms_conversation_top_margin"
         android:paddingEnd="@dimen/default_margin"
-        android:onClick="@{() -> mmsMessageListener.onMmsMessageItemClick(mmsMessage.messageId, position)}"
         android:paddingBottom="@dimen/mms_conversation_top_margin">
 
         <TextView
@@ -37,7 +37,7 @@
             android:layout_width="@dimen/zero_margin"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="@integer/mms_address_max_lines"
+            android:maxLines="@integer/mms_message_max_lines"
             android:text="@{mmsMessage.contentType + ` - Files: `+ mmsMessage.dataList.size()}"
             android:textColor="@android:color/black"
             android:textSize="@dimen/mms_conversation_address"
@@ -67,11 +67,23 @@
             app:layout_constraintTop_toBottomOf="@+id/textOnly" />
 
         <TextView
+            android:id="@+id/sentBy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mms_conversation_top_margin"
+            android:text="@{mmsMessage.fromAddressString}"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/messageType" />
+
+        <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{mmsMessage.date}"
             android:textColor="@android:color/black"
+            app:layout_constraintTop_toBottomOf="@+id/sentBy"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

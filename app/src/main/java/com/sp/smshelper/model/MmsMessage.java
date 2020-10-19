@@ -264,6 +264,18 @@ public class MmsMessage extends BaseModel {
         this.readStatus = readStatus;
     }
 
+    public String getFromAddressString() {
+        StringBuilder sb = new StringBuilder();
+        if (getAddressList() != null && !getAddressList().isEmpty()) {
+            for (int i = 0; i < getAddressList().size(); i++) {
+                if (getAddressList().get(i).contains("From")) {
+                    sb.append(getAddressList().get(i));
+                }
+            }
+        }
+        return !TextUtils.isEmpty(sb.toString()) ? sb.toString() : "From: Self";
+    }
+
     @BindingAdapter("mmsImage")
     public static void loadImage(ImageView imageView, String partId) {
         if (!TextUtils.isEmpty(partId)) {

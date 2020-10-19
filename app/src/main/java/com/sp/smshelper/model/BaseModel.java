@@ -14,6 +14,7 @@ public class BaseModel {
     private boolean locked;
     private boolean seen;
     private String subscriptionId;
+    private List<String> addressList;
 
     public boolean isTextOnly() {
         return textOnly;
@@ -101,6 +102,14 @@ public class BaseModel {
 
     public void setSubscriptionId(String subscriptionId) {
         this.subscriptionId = subscriptionId;
+    }
+
+    public List<String> getAddressList() {
+        return addressList;
+    }
+
+    public void setAddressList(List<String> addressList) {
+        this.addressList = addressList;
     }
 
     public class Data {
