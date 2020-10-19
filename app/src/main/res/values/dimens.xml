@@ -22,4 +22,5 @@
     <dimen name="mms_conversation_address">16sp</dimen>
     <dimen name="mms_conversation_top_margin">8dp</dimen>
     <item name="send_sms_hor_guide" type="dimen" format="float">0.3</item>
+    <dimen name="mms_media_item_height">300dp</dimen>
 </resources>

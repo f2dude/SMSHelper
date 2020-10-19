@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.ActivityReadMmsBinding;
 import com.sp.smshelper.mmsmessages.MmsDetailsFragment;
+import com.sp.smshelper.mmsmessages.MmsMediaFragment;
 import com.sp.smshelper.mmsmessages.MmsMessagesFragment;
 
 public class MmsConversationActivity extends AppCompatActivity {
@@ -65,6 +66,21 @@ public class MmsConversationActivity extends AppCompatActivity {
                         MmsDetailsFragment.newInstance(messageId),
                         MmsDetailsFragment.TAG)
                 .addToBackStack(MmsDetailsFragment.TAG)
+                .commit();
+    }
+
+    /**
+     * Displays MMS media fragment
+     *
+     * @param messageId Message Id
+     */
+    public void startMmsMediaFragment(String messageId) {
+        //Fragment transaction
+        getSupportFragmentManager().beginTransaction()
+                .replace(mBinding.actionContainer.getId(),
+                        MmsMediaFragment.newInstance(messageId),
+                        MmsMediaFragment.TAG)
+                .addToBackStack(MmsMediaFragment.TAG)
                 .commit();
     }
 

@@ -3,6 +3,9 @@ package com.sp.smshelper.mmsmessages;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -50,6 +53,7 @@ public class MmsDetailsFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        setHasOptionsMenu(true);
         //Set title
         Objects.requireNonNull(getActivity()).setTitle(R.string.mms_details);
 
@@ -61,6 +65,24 @@ public class MmsDetailsFragment extends BaseFragment {
                 getMmsMessageDetails();
             }
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.mms_details, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.viewImages:
+                ((MmsConversationActivity) getActivity()).startMmsMediaFragment(mMessageId);
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**

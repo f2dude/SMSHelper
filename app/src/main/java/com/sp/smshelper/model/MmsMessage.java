@@ -1,6 +1,15 @@
 package com.sp.smshelper.model;
 
-public class MmsMessage extends BaseModel{
+import android.text.TextUtils;
+import android.util.Log;
+import android.widget.ImageView;
+
+import androidx.databinding.BindingAdapter;
+
+import com.bumptech.glide.Glide;
+import com.sp.smshelper.repository.MmsRepository;
+
+public class MmsMessage extends BaseModel {
 
     private String text;
     private MmsConversation.MessageType messageBoxType;
@@ -253,5 +262,19 @@ public class MmsMessage extends BaseModel{
 
     public void setReadStatus(String readStatus) {
         this.readStatus = readStatus;
+    }
+
+    @BindingAdapter("mmsImage")
+    public static void loadImage(ImageView imageView, String messageId) {
+        if (!TextUtils.isEmpty(messageId)) {
+            try {
+                MmsRepository mmsRepository = new MmsRepository();
+                Glide.with(imageView.getContext())
+                        .load(mmsRepository.getMmsImage(imageView.getContext(), messageId))
+                        .into(imageView);
+            } catch (Exception e) {
+                Log.e("MmsMessage", "Exception in loadImage(): " + e);
+            }
+        }
     }
 }

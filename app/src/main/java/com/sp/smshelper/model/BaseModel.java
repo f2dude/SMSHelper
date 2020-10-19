@@ -105,17 +105,8 @@ public class BaseModel {
 
     public class Data {
 
-        private String dataPath;
         private String contentType;
         private String text;
-
-        public String getDataPath() {
-            return dataPath;
-        }
-
-        public void setDataPath(String dataPath) {
-            this.dataPath = dataPath;
-        }
 
         public String getContentType() {
             return contentType;
