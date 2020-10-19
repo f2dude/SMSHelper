@@ -265,12 +265,12 @@ public class MmsMessage extends BaseModel {
     }
 
     @BindingAdapter("mmsImage")
-    public static void loadImage(ImageView imageView, String messageId) {
-        if (!TextUtils.isEmpty(messageId)) {
+    public static void loadImage(ImageView imageView, String partId) {
+        if (!TextUtils.isEmpty(partId)) {
             try {
                 MmsRepository mmsRepository = new MmsRepository();
                 Glide.with(imageView.getContext())
-                        .load(mmsRepository.getMmsImage(imageView.getContext(), messageId))
+                        .load(mmsRepository.extractImage(imageView.getContext(), partId))
                         .into(imageView);
             } catch (Exception e) {
                 Log.e("MmsMessage", "Exception in loadImage(): " + e);

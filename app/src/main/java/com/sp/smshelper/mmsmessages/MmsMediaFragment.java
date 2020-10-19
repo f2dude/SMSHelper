@@ -78,7 +78,7 @@ public class MmsMediaFragment extends BaseFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new SimpleDividerItemDecoration(getContext(), R.drawable.item_divider));
 
-        mAdapter = new MmsMediaAdapter(mMessageId);
+        mAdapter = new MmsMediaAdapter();
         recyclerView.setAdapter(mAdapter);
     }
 

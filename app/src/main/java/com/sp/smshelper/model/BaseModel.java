@@ -107,6 +107,7 @@ public class BaseModel {
 
         private String contentType;
         private String text;
+        private String partId;
 
         public String getContentType() {
             return contentType;
@@ -122,6 +123,14 @@ public class BaseModel {
 
         public void setText(String text) {
             this.text = text;
+        }
+
+        public String getPartId() {
+            return partId;
+        }
+
+        public void setPartId(String partId) {
+            this.partId = partId;
         }
     }
 }

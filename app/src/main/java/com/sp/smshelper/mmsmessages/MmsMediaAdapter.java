@@ -14,11 +14,6 @@ import java.util.List;
 public class MmsMediaAdapter extends RecyclerView.Adapter<MmsMediaAdapter.MmsMediaViewHolder> {
 
     private List<BaseModel.Data> mDataList;
-    private String mMessageId;
-
-    public MmsMediaAdapter(String messageId) {
-        this.mMessageId = messageId;
-    }
 
     @NonNull
     @Override
@@ -42,7 +37,7 @@ public class MmsMediaAdapter extends RecyclerView.Adapter<MmsMediaAdapter.MmsMed
         notifyDataSetChanged();
     }
 
-    class MmsMediaViewHolder extends RecyclerView.ViewHolder {
+    static class MmsMediaViewHolder extends RecyclerView.ViewHolder {
 
         private MmsMediaItemBinding mBinding;
 
@@ -52,7 +47,7 @@ public class MmsMediaAdapter extends RecyclerView.Adapter<MmsMediaAdapter.MmsMed
         }
 
         void bind(BaseModel.Data data) {
-            mBinding.setMessageId(mMessageId);
+            mBinding.setPartId(data.getPartId());
             mBinding.setText(data.getText());
             mBinding.setContentType(data.getContentType());
         }

@@ -408,7 +408,7 @@ public class MmsRepository extends BaseRepository {
     public List<BaseModel.Data> getMmsData(Context context, String mmsId) {
         List<BaseModel.Data> dataList = new ArrayList<>();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
-                Telephony.Mms.Part._DATA,
+                Telephony.Mms.Part._ID,
                 Telephony.Mms.Part.TEXT};
         ContentResolver contentResolver = context.getContentResolver();
         String selection = Telephony.Mms.Part.MSG_ID + " = ?";
@@ -428,6 +428,7 @@ public class MmsRepository extends BaseRepository {
                     if (ContentType.isSupportedImageType(contentType)) {
                         data = new BaseModel().new Data();
                         data.setContentType(contentType);
+                        data.setPartId(getValue(cursor, Telephony.Mms.Part._ID));
 
                         dataList.add(data);
                     } else if (ContentType.isTextType(contentType)) {
@@ -450,54 +451,13 @@ public class MmsRepository extends BaseRepository {
     }
 
     /**
-     * Gets MMS image from part tabel
-     *
-     * @param context   Activity context
-     * @param messageId Message id
-     * @return Bitmap object
-     */
-    public Bitmap getMmsImage(Context context, String messageId) {
-        Bitmap bitmap = null;
-        ContentResolver contentResolver = context.getContentResolver();
-        String[] projection = {Telephony.Mms.Part._ID,
-                Telephony.Mms.Part.CONTENT_TYPE};
-        String selection = Telephony.Mms.Part.MSG_ID + " = ?";
-        String[] selectionArgs = new String[]{messageId};
-        Uri uri = Uri.withAppendedPath(Telephony.Mms.CONTENT_URI, "part");
-        Cursor cursor = contentResolver.query(uri,
-                projection,
-                selection,
-                selectionArgs,
-                null);
-        try {
-            if (null != cursor) {
-                while (cursor.moveToNext()) {
-                    String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
-                    String partId = getValue(cursor, Telephony.Mms.Part._ID);
-                    if (ContentType.isSupportedImageType(contentType)) {
-                        bitmap = extractImage(context, partId);
-                        break;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception in getMmsImage(): " + e);
-        } finally {
-            if (null != cursor) {
-                cursor.close();
-            }
-        }
-        return bitmap;
-    }
-
-    /**
      * Extracts image using part id
      *
      * @param context Activity context
      * @param partId  Part id
      * @return Bitmap image
      */
-    private Bitmap extractImage(Context context, String partId) {
+    public Bitmap extractImage(Context context, String partId) {
         Bitmap bitmap = null;
         InputStream is = null;
         Uri.Builder builder = Telephony.Mms.CONTENT_URI.buildUpon();
