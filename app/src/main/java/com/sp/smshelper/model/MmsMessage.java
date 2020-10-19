@@ -1,13 +1,21 @@
 package com.sp.smshelper.model;
 
-public class MmsMessage extends BaseModel{
+import android.text.TextUtils;
+import android.util.Log;
+import android.widget.ImageView;
+
+import androidx.databinding.BindingAdapter;
+
+import com.bumptech.glide.Glide;
+import com.sp.smshelper.repository.MmsRepository;
+
+public class MmsMessage extends BaseModel {
 
     private String text;
     private MmsConversation.MessageType messageBoxType;
     private String messageContentType;//Do not use this for finding out media type.
     private String deliveryTime;
     private String dateSent;
-    private String count;
     private String contentClass;
     private String contentLocation;
     private String creator;
@@ -20,7 +28,7 @@ public class MmsMessage extends BaseModel{
     private String mmsVersion;
     private String priority;
     private boolean readReport;
-    private boolean readStatus;
+    private String readStatus;
     private boolean reportAllowed;
     private String responseStatus;
     private String responseText;
@@ -70,14 +78,6 @@ public class MmsMessage extends BaseModel{
 
     public void setDateSent(String dateSent) {
         this.dateSent = dateSent;
-    }
-
-    public String getCount() {
-        return count;
-    }
-
-    public void setCount(String count) {
-        this.count = count;
     }
 
     public String getContentClass() {
@@ -176,14 +176,6 @@ public class MmsMessage extends BaseModel{
         this.readReport = readReport;
     }
 
-    public boolean isReadStatus() {
-        return readStatus;
-    }
-
-    public void setReadStatus(boolean readStatus) {
-        this.readStatus = readStatus;
-    }
-
     public boolean isReportAllowed() {
         return reportAllowed;
     }
@@ -262,5 +254,27 @@ public class MmsMessage extends BaseModel{
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public String getReadStatus() {
+        return readStatus;
+    }
+
+    public void setReadStatus(String readStatus) {
+        this.readStatus = readStatus;
+    }
+
+    @BindingAdapter("mmsImage")
+    public static void loadImage(ImageView imageView, String partId) {
+        if (!TextUtils.isEmpty(partId)) {
+            try {
+                MmsRepository mmsRepository = new MmsRepository();
+                Glide.with(imageView.getContext())
+                        .load(mmsRepository.extractImage(imageView.getContext(), partId))
+                        .into(imageView);
+            } catch (Exception e) {
+                Log.e("MmsMessage", "Exception in loadImage(): " + e);
+            }
+        }
     }
 }

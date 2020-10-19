@@ -30,4 +30,6 @@
     <string name="mms_conversations">MMS conversations</string>
     <string name="mms_messages">MMS Messages</string>
     <string name="mms_details">MMS details</string>
+    <string name="view_media">View media</string>
+    <string name="mms_media">MMS media</string>
 </resources>

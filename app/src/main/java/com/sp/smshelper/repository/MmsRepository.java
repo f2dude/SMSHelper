@@ -1,16 +1,25 @@
 package com.sp.smshelper.repository;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.Telephony;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
+import com.sp.smshelper.pdu_utils.ContentType;
+import com.sp.smshelper.pdu_utils.MmsException;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -236,12 +245,14 @@ public class MmsRepository extends BaseRepository {
                     mmsMessage.setMessageContentType(getValue(cursor, Telephony.Mms.CONTENT_TYPE));
                     mmsMessage.setDeliveryTime(getValue(cursor, Telephony.Mms.DELIVERY_TIME));
                     mmsMessage.setDateSent(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.DATE_SENT)) * 1000));
-                    mmsMessage.setCount(getValue(cursor, Telephony.Mms._COUNT));
                     mmsMessage.setContentClass(getValue(cursor, Telephony.Mms.CONTENT_CLASS));
                     mmsMessage.setContentLocation(getValue(cursor, Telephony.Mms.CONTENT_LOCATION));
                     mmsMessage.setCreator(getValue(cursor, Telephony.Mms.CREATOR));
                     mmsMessage.setDeliveryReport(getValue(cursor, Telephony.Mms.DELIVERY_REPORT));
-                    mmsMessage.setExpiry(getFormattedDate(Long.parseLong(getValue(cursor, Telephony.Mms.EXPIRY))));
+                    String expiry = getValue(cursor, Telephony.Mms.EXPIRY);
+                    if (!TextUtils.isEmpty(expiry)) {
+                        mmsMessage.setExpiry(getFormattedDate(Long.parseLong(expiry)));
+                    }
 
                     boolean locked = false;
                     if (Integer.parseInt(getValue(cursor, Telephony.Mms.LOCKED)) == 1) {
@@ -263,19 +274,17 @@ public class MmsRepository extends BaseRepository {
                     mmsMessage.setRead(read);
 
                     boolean readReport = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ_REPORT)) == 1) {
+                    String readReportValue = getValue(cursor, Telephony.Mms.READ_REPORT);
+                    if (!TextUtils.isEmpty(readReportValue) && Integer.parseInt(readReportValue) == 1) {
                         readReport = true;
                     }
                     mmsMessage.setReadReport(readReport);
 
-                    boolean readStatus = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.READ_STATUS)) == 1) {
-                        readStatus = true;
-                    }
-                    mmsMessage.setReadStatus(readStatus);
+                    mmsMessage.setReadStatus(getValue(cursor, Telephony.Mms.READ_STATUS));
 
                     boolean reportAllowed = false;
-                    if (Integer.parseInt(getValue(cursor, Telephony.Mms.REPORT_ALLOWED)) == 1) {
+                    String reportAllowedValue = getValue(cursor, Telephony.Mms.REPORT_ALLOWED);
+                    if (!TextUtils.isEmpty(reportAllowedValue) && Integer.parseInt(reportAllowedValue) == 1) {
                         reportAllowed = true;
                     }
                     mmsMessage.setReportAllowed(reportAllowed);
@@ -396,10 +405,11 @@ public class MmsRepository extends BaseRepository {
      * @param mmsId   MMS message Id
      * @return Files list
      */
-    private List<MmsConversation.Data> getMmsData(Context context, String mmsId) {
+    public List<BaseModel.Data> getMmsData(Context context, String mmsId) {
         List<BaseModel.Data> dataList = new ArrayList<>();
         String[] projection = {Telephony.Mms.Part.CONTENT_TYPE,
-                Telephony.Mms.Part._DATA};
+                Telephony.Mms.Part._ID,
+                Telephony.Mms.Part.TEXT};
         ContentResolver contentResolver = context.getContentResolver();
         String selection = Telephony.Mms.Part.MSG_ID + " = ?";
         String[] selectionArgs = new String[]{mmsId};
@@ -413,11 +423,18 @@ public class MmsRepository extends BaseRepository {
             if (null != cursor) {
                 while (cursor.moveToNext()) {
                     String contentType = getValue(cursor, Telephony.Mms.Part.CONTENT_TYPE);
-                    if (!contentType.equals("application/smil")) {
 
-                        BaseModel.Data data = new BaseModel().new Data();
+                    BaseModel.Data data;
+                    if (ContentType.isSupportedImageType(contentType)) {
+                        data = new BaseModel().new Data();
                         data.setContentType(contentType);
-                        data.setDataPath(getValue(cursor, Telephony.Mms.Part._DATA));
+                        data.setPartId(getValue(cursor, Telephony.Mms.Part._ID));
+
+                        dataList.add(data);
+                    } else if (ContentType.isTextType(contentType)) {
+                        data = new BaseModel().new Data();
+                        data.setContentType(contentType);
+                        data.setText(getValue(cursor, Telephony.Mms.Part.TEXT));
 
                         dataList.add(data);
                     }
@@ -431,5 +448,181 @@ public class MmsRepository extends BaseRepository {
             }
         }
         return dataList;
+    }
+
+    /**
+     * Extracts image using part id
+     *
+     * @param context Activity context
+     * @param partId  Part id
+     * @return Bitmap image
+     */
+    public Bitmap extractImage(Context context, String partId) {
+        Bitmap bitmap = null;
+        InputStream is = null;
+        Uri.Builder builder = Telephony.Mms.CONTENT_URI.buildUpon();
+        builder.appendPath("part")
+                .appendPath(partId);
+        try {
+            is = context.getContentResolver().openInputStream(builder.build());
+            bitmap = BitmapFactory.decodeStream(is);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException in extractImage(): " + e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "IOException in finally of extractImage(): " + e);
+                }
+            }
+        }
+        return bitmap;
+    }
+
+    /**
+     * Checks if the content location exists in MMS table
+     *
+     * @param context  Activity context
+     * @param location Content location
+     * @return True if it exists, False otherwise
+     */
+    public boolean isContentLocationExists(Context context, String location) {
+        Log.d(TAG, "isContentLocationExists()");
+        boolean exists = false;
+        ContentResolver contentResolver = context.getContentResolver();
+        String[] projection = new String[]{Telephony.Mms._ID};
+        String selection = Telephony.Mms.CONTENT_LOCATION + " = ?";
+        String[] selectionArgs = new String[]{location};
+        Cursor cursor = contentResolver.query(Telephony.Mms.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                Telephony.Mms.DEFAULT_SORT_ORDER);
+        if (null != cursor) {
+            try {
+                if (cursor.getCount() > 0) {
+                    // We already received the same notification before.
+                    cursor.close();
+                    exists = true;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Exception in isContentLocationExists(): " + e);
+            } finally {
+                cursor.close();
+            }
+        }
+        return exists;
+    }
+
+    /**
+     * Get the content location based on uri
+     *
+     * @param context Activity context
+     * @param uri     MMS uri
+     * @return content location
+     * @throws MmsException
+     */
+    public String getContentLocation(Context context, Uri uri) throws MmsException {
+        String[] projection = new String[]{
+                Telephony.Mms.CONTENT_LOCATION
+        };
+        ContentResolver contentResolver = context.getContentResolver();
+        Cursor cursor = contentResolver.query(uri, projection, null, null, null);
+
+        if (cursor != null) {
+            try {
+                if ((cursor.getCount() == 1) && cursor.moveToFirst()) {
+                    String location = getValue(cursor, Telephony.Mms.CONTENT_LOCATION);
+                    cursor.close();
+                    return location;
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        throw new MmsException("Cannot get X-Mms-Content-Location from: " + uri);
+    }
+
+    /**
+     * Query for a URI in MMS table
+     *
+     * @param context       Activity context
+     * @param resolver      Content resolver
+     * @param uri           MMS table uri
+     * @param projection    Projected columns
+     * @param selection     Selections
+     * @param selectionArgs Selection values
+     * @param sortOrder     Sort order
+     * @return Cursor object
+     */
+    public Cursor query(Context context, ContentResolver resolver, Uri uri,
+                        String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        try {
+            return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Catch a SQLiteException when query: ", e);
+            return null;
+        }
+    }
+
+    /**
+     * Inserts data in the table
+     *
+     * @param context  Activity Context
+     * @param resolver Content resolver
+     * @param uri      Table uri
+     * @param values   Content values
+     * @return Uri after successful insertion
+     */
+    public Uri insert(Context context, ContentResolver resolver,
+                      Uri uri, ContentValues values) {
+        try {
+            return resolver.insert(uri, values);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Catch a SQLiteException when insert: ", e);
+            return null;
+        }
+    }
+
+    /**
+     * Carries out update operation
+     *
+     * @param context       Activity context
+     * @param resolver      Content resolver
+     * @param uri           Table uri
+     * @param values        Content values
+     * @param where         Selection criteria
+     * @param selectionArgs Selection values
+     * @return Number of updated records
+     */
+    public int update(Context context, ContentResolver resolver, Uri uri,
+                      ContentValues values, String where, String[] selectionArgs) {
+        try {
+            return resolver.update(uri, values, where, selectionArgs);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Catch a SQLiteException when update: ", e);
+            return -1;
+        }
+    }
+
+    /**
+     * Carries out delete operation
+     *
+     * @param context       Activity context
+     * @param resolver      Content resolver
+     * @param uri           Table uri
+     * @param where         Selection criteria
+     * @param selectionArgs Selection values
+     * @return Number of deleted records
+     */
+    public int delete(Context context, ContentResolver resolver, Uri uri,
+                      String where, String[] selectionArgs) {
+        try {
+            return resolver.delete(uri, where, selectionArgs);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Catch a SQLiteException when delete: ", e);
+            return -1;
+        }
     }
 }

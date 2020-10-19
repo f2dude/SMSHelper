@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.sp.smshelper">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
@@ -16,7 +18,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".conversation.ConversationsActivity" />
-        <activity android:name=".readmms.MmsConversationActivity"/>
+        <activity android:name=".readmms.MmsConversationActivity" />
         <activity
             android:name=".sendsms.SendSmsActivity"
             android:windowSoftInputMode="adjustPan">
@@ -79,6 +80,20 @@
                 <data android:scheme="mmsto" />
             </intent-filter>
         </service>
+        <receiver
+            android:name=".receivesms.MmsReceivedReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.sp.smshelper.receivesms.MMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <provider
+            android:name=".provider.MmsFileProvider"
+            android:authorities="${applicationId}.provider.MmsFileProvider"
+            android:enabled="true"
+            android:exported="false"
+            android:grantUriPermissions="true" />
     </application>
 
 </manifest>

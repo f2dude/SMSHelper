@@ -105,16 +105,9 @@ public class BaseModel {
 
     public class Data {
 
-        private String dataPath;
         private String contentType;
-
-        public String getDataPath() {
-            return dataPath;
-        }
-
-        public void setDataPath(String dataPath) {
-            this.dataPath = dataPath;
-        }
+        private String text;
+        private String partId;
 
         public String getContentType() {
             return contentType;
@@ -122,6 +115,22 @@ public class BaseModel {
 
         public void setContentType(String contentType) {
             this.contentType = contentType;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+
+        public String getPartId() {
+            return partId;
+        }
+
+        public void setPartId(String partId) {
+            this.partId = partId;
         }
     }
 }
