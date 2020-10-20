@@ -9,4 +9,6 @@ public interface IMainActivity {
     void readMms();
 
     void sendMms();
+
+    void clearDefaults();
 }

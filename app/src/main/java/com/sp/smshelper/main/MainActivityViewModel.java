@@ -1,6 +1,7 @@
 package com.sp.smshelper.main;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.provider.Telephony;
@@ -11,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModel;
 
 import com.sp.smshelper.BuildConfig;
+import com.sp.smshelper.receivesms.SmsReceiver;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Single;
@@ -52,6 +54,8 @@ public class MainActivityViewModel extends ViewModel {
     Single<Boolean> checkDefaultApp(Context context) {
         Log.d(TAG, "checkDefaultApp()");
         return Single.fromCallable(() -> {
+            checkComponentEnabledSetting(context);
+
             String defaultPackage = Telephony.Sms.getDefaultSmsPackage(context);
             Log.d(TAG, "Default sms package: " + defaultPackage);
             String appPackageName = BuildConfig.APPLICATION_ID;
@@ -61,5 +65,31 @@ public class MainActivityViewModel extends ViewModel {
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * Checks the setting of component
+     *
+     * @param context Activity context
+     */
+    private void checkComponentEnabledSetting(Context context) {
+        int isStateDisabled = context.getPackageManager().getComponentEnabledSetting(new ComponentName(context, SmsReceiver.class));
+        if (isStateDisabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+            changeComponentSetting(context, PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
+            Log.d(TAG, "Enabled SMSReceiver component");
+        }
+    }
+
+    /**
+     * Changes the setting of component
+     *
+     * @param context Activity context
+     * @param setting Setting to set
+     */
+    void changeComponentSetting(Context context, int setting) {
+        context.getPackageManager()
+                .setComponentEnabledSetting(new ComponentName(context, SmsReceiver.class),
+                        setting,
+                        PackageManager.DONT_KILL_APP);
     }
 }
