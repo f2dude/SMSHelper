@@ -32,4 +32,5 @@
     <string name="mms_details">MMS details</string>
     <string name="view_media">View media</string>
     <string name="mms_media">MMS media</string>
+    <string name="reset_handler">Reset SMS handler</string>
 </resources>

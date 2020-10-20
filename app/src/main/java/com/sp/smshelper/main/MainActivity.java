@@ -113,6 +113,20 @@ public class MainActivity extends BaseActivity implements IMainActivity {
     }
 
     /**
+     * Clears the app defaults
+     */
+    @Override
+    public void clearDefaults() {
+        Disposable disposable = mViewModel.checkDefaultApp(this)
+                .subscribe(aBoolean -> {
+                    if (aBoolean) {
+                        mViewModel.changeComponentSetting(this, PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+                    }
+                });
+        addToCompositeDisposable(disposable);
+    }
+
+    /**
      * Requests for default app
      */
     private void requestDefaultApp() {
