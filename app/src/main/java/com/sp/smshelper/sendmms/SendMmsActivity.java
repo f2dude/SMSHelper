@@ -21,6 +21,7 @@ public class SendMmsActivity extends BaseActivity {
 
     private ActivitySendMmsBinding mBinding;
     private SendMmsViewModel mViewModel;
+    private StringBuilder mSb = new StringBuilder();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +66,23 @@ public class SendMmsActivity extends BaseActivity {
             String address = mBinding.phoneNumber.getText().toString().trim();
             String subject = mBinding.subject.getText().toString().trim();
             String messageBody = mBinding.mmsBody.getText().toString().trim();
-
-            if (!TextUtils.isEmpty(address)) {
-                mViewModel.sendMmsMessage(address, subject, messageBody, R.drawable.android);
+            if (TextUtils.isEmpty(mSb.toString())) {
+                mSb.append(address);
+            }
+            if (!TextUtils.isEmpty(mSb.toString().trim())) {
+                addToCompositeDisposable(mViewModel.sendMmsMessage(mSb.toString().trim(), subject, messageBody, R.drawable.android));
             }
         } else {
             Toast.makeText(this, getText(R.string.select_phone_number), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void onAddClicked() {
+        Log.d(TAG, "onAddClicked");
+        mSb.append(mBinding.phoneNumber.getText());
+        mSb.append(" ");
+
+        mBinding.addedNumbers.setText(mSb.toString().trim());
+        mBinding.phoneNumber.setText("");
     }
 }

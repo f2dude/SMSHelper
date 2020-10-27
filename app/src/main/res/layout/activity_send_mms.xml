@@ -109,5 +109,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/image" />
+
+        <Button
+            android:id="@+id/add"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:onClick="@{() -> mSendMmsActivity.onAddClicked()}"
+            android:text="@string/add"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline2" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

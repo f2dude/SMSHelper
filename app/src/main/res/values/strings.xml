@@ -35,4 +35,5 @@
     <string name="reset_handler">Reset SMS handler</string>
     <string name="enter_subject">Enter subject</string>
     <string name="mms_sending_failed">MMS sending failed</string>
+    <string name="add">Add</string>
 </resources>
