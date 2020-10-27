@@ -1285,8 +1285,8 @@ public class PduPersister {
      * @return A Uri which can be used to access the stored PDU.
      */
 
-    private Uri persist(GenericPdu pdu, Uri uri, boolean createThreadId, boolean groupMmsEnabled,
-                        HashMap<Uri, InputStream> preOpenedFiles, int subscriptionId)
+    public Uri persist(GenericPdu pdu, Uri uri, boolean createThreadId, boolean groupMmsEnabled,
+                       HashMap<Uri, InputStream> preOpenedFiles, int subscriptionId)
             throws MmsException {
         if (uri == null) {
             throw new MmsException("Uri may not be null.");

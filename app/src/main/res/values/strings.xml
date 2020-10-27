@@ -33,4 +33,6 @@
     <string name="view_media">View media</string>
     <string name="mms_media">MMS media</string>
     <string name="reset_handler">Reset SMS handler</string>
+    <string name="enter_subject">Enter subject</string>
+    <string name="mms_sending_failed">MMS sending failed</string>
 </resources>

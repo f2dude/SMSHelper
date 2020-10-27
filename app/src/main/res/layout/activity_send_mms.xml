@@ -1,8 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".sendmms.SendMmsActivity">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <data>
+
+        <variable
+            name="mSendMmsActivity"
+            type="com.sp.smshelper.sendmms.SendMmsActivity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/default_margin"
+        tools:context=".sendmms.SendMmsActivity">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/ownNumbersList"
+            android:layout_width="@dimen/zero_margin"
+            android:layout_height="@dimen/zero_margin"
+            app:layout_constraintBottom_toTopOf="@+id/guideline2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:listitem="@layout/own_number_list_item" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="@dimen/send_mms_hor_guide" />
+
+        <EditText
+            android:id="@+id/phoneNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="@integer/send_mms_ems"
+            android:hint="@string/enter_phone_number"
+            android:importantForAutofill="no"
+            android:inputType="phone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/guideline2" />
+
+        <TextView
+            android:id="@+id/addedNumbers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/send_mms_margin_top"
+            android:text="@string/sample_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/phoneNumber" />
+
+        <EditText
+            android:id="@+id/subject"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/send_mms_margin_top"
+            android:ems="@integer/send_mms_ems"
+            android:gravity="start|top"
+            android:hint="@string/enter_subject"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addedNumbers" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/verticalGuideLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="@dimen/send_mms_ver_guide" />
+
+        <EditText
+            android:id="@+id/mmsBody"
+            android:layout_width="@dimen/zero_margin"
+            android:layout_height="@dimen/mms_body_height"
+            android:layout_marginTop="@dimen/send_mms_margin_top"
+            android:gravity="start|top"
+            android:hint="@string/enter_message"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            app:layout_constraintEnd_toStartOf="@+id/verticalGuideLine"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/subject" />
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="@dimen/zero_margin"
+            android:layout_height="@dimen/mms_body_height"
+            android:layout_marginTop="@dimen/send_mms_margin_top"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/mmsBody"
+            app:layout_constraintTop_toBottomOf="@+id/subject"
+            app:srcCompat="@drawable/android" />
+
+        <Button
+            android:id="@+id/sendMMS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/send_mms_margin_top"
+            android:onClick="@{() -> mSendMmsActivity.onSendClicked()}"
+            android:text="@string/send"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/image" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

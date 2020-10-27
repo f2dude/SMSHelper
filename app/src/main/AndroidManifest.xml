@@ -42,8 +42,7 @@
                 <data android:scheme="mmsto" />
             </intent-filter>
         </activity>
-        <activity android:name=".sendmms.SendMmsActivity" />
-        <!-- BroadcastReceiver that listens for incoming SMS messages -->
+        <activity android:name=".sendmms.SendMmsActivity" /> <!-- BroadcastReceiver that listens for incoming SMS messages -->
         <receiver
             android:name=".receivesms.SmsReceiver"
             android:enabled="true"
@@ -88,6 +87,14 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="com.sp.smshelper.receivesms.MMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".receivesms.MmsSentReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.sp.smshelper.receivesms.MMS_SENT" />
             </intent-filter>
         </receiver>
 
