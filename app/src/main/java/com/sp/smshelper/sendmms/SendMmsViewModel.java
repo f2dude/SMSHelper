@@ -164,14 +164,6 @@ public class SendMmsViewModel extends ViewModel {
 
     private void sendMmsMessage(String text, String[] addresses, Bitmap[] image,
                                 String[] imageNames, List<MmsSenderObject.Part> parts, String subject, boolean save, Uri messageUri) {
-        // merge the string[] of addresses into a single string so they can be inserted into the database easier
-        String address = "";
-
-        for (int i = 0; i < addresses.length; i++) {
-            address += addresses[i] + " ";
-        }
-
-        address = address.trim();
 
         // create the parts to send
         ArrayList<MMSPart> data = new ArrayList<>();
