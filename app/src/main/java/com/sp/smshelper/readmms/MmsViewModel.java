@@ -15,6 +15,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.sp.smshelper.mmsmessages.MmsMessagesFragment;
 import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
@@ -43,29 +44,6 @@ public class MmsViewModel extends ViewModel {
     private MutableLiveData<List<BaseModel.Data>> mMutableMmsData = new MutableLiveData<>();
     private ConversationsObserver mConversationsObserver;
     private Fragment mActiveFragment;
-    /**
-     * Receives updates from {@link ConversationsObserver}
-     */
-    private Handler mSmsHandler = new Handler(Looper.getMainLooper()) {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.getData() != null) {
-                boolean needChange = msg.getData().getBoolean(ConversationsObserver.BUNDLE_ARGS_CHANGE_STATUS);
-                if (needChange) {
-                    String hostUri = msg.getData().getString(ConversationsObserver.BUNDLE_ARGS_URI);
-                    if (!TextUtils.isEmpty(hostUri) && hostUri.equals(Telephony.Mms.CONTENT_URI.getHost())) {
-                        if (mActiveFragment instanceof MmsConversationFragment) {
-                            getAllMmsConversations();
-                        } /*else if (mActiveFragment instanceof SmsMessagesFragment &&
-                                !TextUtils.isEmpty(((SmsMessagesFragment) mActiveFragment).getThreadId())) {
-                            getSmsMessagesByThreadId(((SmsMessagesFragment) mActiveFragment).getThreadId());
-                        }*/
-                    }
-                }
-            }
-        }
-    };
 
     public void setContext(Context context) {
         this.mContext = context;
@@ -297,6 +275,30 @@ public class MmsViewModel extends ViewModel {
     }
 
     /**
+     * Receives updates from {@link ConversationsObserver}
+     */
+    private Handler mSmsHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.getData() != null) {
+                boolean needChange = msg.getData().getBoolean(ConversationsObserver.BUNDLE_ARGS_CHANGE_STATUS);
+                if (needChange) {
+                    String hostUri = msg.getData().getString(ConversationsObserver.BUNDLE_ARGS_URI);
+                    if (!TextUtils.isEmpty(hostUri) && hostUri.equals(Telephony.Mms.CONTENT_URI.getHost())) {
+                        if (mActiveFragment instanceof MmsConversationFragment) {
+                            getAllMmsConversations();
+                        } else if (mActiveFragment instanceof MmsMessagesFragment &&
+                                !TextUtils.isEmpty(((MmsMessagesFragment) mActiveFragment).getThreadId())) {
+                            getMmsMessagesByThreadId(((MmsMessagesFragment) mActiveFragment).getThreadId());
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    /**
      * Registers for conversation table
      *
      * @param fragment Current active fragment
@@ -314,5 +316,22 @@ public class MmsViewModel extends ViewModel {
     public void unregisterMmsMessages() {
         mContext.getContentResolver().unregisterContentObserver(mConversationsObserver);
         this.mActiveFragment = null;
+    }
+
+    /**
+     * Delets MMS messages
+     *
+     * @param messageIdsList Message Ids list
+     * @return Operation results
+     */
+    public Single<ContentProviderResult[]> deleteMmsMessages(List<String> messageIdsList) {
+        Log.d(TAG, "deleteMmsMessages()");
+
+        return Single.fromCallable(() -> {
+            MmsRepository mmsRepository = new MmsRepository();
+            return mmsRepository.deleteMmsMessages(mContext, messageIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }

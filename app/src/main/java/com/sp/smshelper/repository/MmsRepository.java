@@ -678,4 +678,32 @@ public class MmsRepository extends BaseRepository {
         }
         return results;
     }
+
+    /**
+     * Deletes mms messages
+     *
+     * @param context    Activity context
+     * @param messageIds List of message ids
+     * @return Content provider results
+     */
+    public ContentProviderResult[] deleteMmsMessages(Context context, List<String> messageIds) {
+        Log.d(TAG, "deleteMmsMessages()");
+
+        ContentProviderResult[] results = null;
+        String selection = Telephony.Mms._ID + " = ?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            for (String messageId : messageIds) {
+                String[] selectionArgs = new String[]{messageId};
+                ops.add(ContentProviderOperation.newDelete(Telephony.Mms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs)
+                        .withYieldAllowed(true)
+                        .build());
+            }
+            results = context.getContentResolver().applyBatch(Objects.requireNonNull(Telephony.Mms.CONTENT_URI.getAuthority()), ops);
+        } catch (Exception e) {
+            Log.e(TAG, "deleteMmsMessages(): " + e);
+        }
+        return results;
+    }
 }
