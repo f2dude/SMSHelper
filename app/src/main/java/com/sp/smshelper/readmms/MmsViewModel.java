@@ -1,8 +1,16 @@
 package com.sp.smshelper.readmms;
 
+import android.content.ContentProviderResult;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.provider.Telephony;
+import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -10,6 +18,7 @@ import androidx.lifecycle.ViewModel;
 import com.sp.smshelper.model.BaseModel;
 import com.sp.smshelper.model.MmsConversation;
 import com.sp.smshelper.model.MmsMessage;
+import com.sp.smshelper.repository.ConversationsObserver;
 import com.sp.smshelper.repository.MmsRepository;
 
 import java.util.List;
@@ -32,6 +41,31 @@ public class MmsViewModel extends ViewModel {
     private MutableLiveData<List<MmsMessage>> mMutableMmsMessages = new MutableLiveData<>();
     private MutableLiveData<String> mMutableMms = new MutableLiveData<>();
     private MutableLiveData<List<BaseModel.Data>> mMutableMmsData = new MutableLiveData<>();
+    private ConversationsObserver mConversationsObserver;
+    private Fragment mActiveFragment;
+    /**
+     * Receives updates from {@link ConversationsObserver}
+     */
+    private Handler mSmsHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.getData() != null) {
+                boolean needChange = msg.getData().getBoolean(ConversationsObserver.BUNDLE_ARGS_CHANGE_STATUS);
+                if (needChange) {
+                    String hostUri = msg.getData().getString(ConversationsObserver.BUNDLE_ARGS_URI);
+                    if (!TextUtils.isEmpty(hostUri) && hostUri.equals(Telephony.Mms.CONTENT_URI.getHost())) {
+                        if (mActiveFragment instanceof MmsConversationFragment) {
+                            getAllMmsConversations();
+                        } /*else if (mActiveFragment instanceof SmsMessagesFragment &&
+                                !TextUtils.isEmpty(((SmsMessagesFragment) mActiveFragment).getThreadId())) {
+                            getSmsMessagesByThreadId(((SmsMessagesFragment) mActiveFragment).getThreadId());
+                        }*/
+                    }
+                }
+            }
+        }
+    };
 
     public void setContext(Context context) {
         this.mContext = context;
@@ -239,5 +273,46 @@ public class MmsViewModel extends ViewModel {
      */
     public LiveData<List<BaseModel.Data>> watchMmsData() {
         return mMutableMmsData;
+    }
+
+    public MmsViewModel() {
+        mConversationsObserver = new ConversationsObserver(mSmsHandler);
+    }
+
+    /**
+     * Deletes MMS threads
+     *
+     * @param threadIdsList Thread Ids list
+     * @return Operation results
+     */
+    Single<ContentProviderResult[]> deleteMmsThreads(List<String> threadIdsList) {
+        Log.d(TAG, "deleteMmsThreads()");
+
+        return Single.fromCallable(() -> {
+            MmsRepository mmsRepository = new MmsRepository();
+            return mmsRepository.deleteMmsThreads(mContext, threadIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
+    /**
+     * Registers for conversation table
+     *
+     * @param fragment Current active fragment
+     */
+    public void registerMmsMessages(Fragment fragment) {
+        mContext.getContentResolver().registerContentObserver(Telephony.Mms.CONTENT_URI,
+                true,
+                mConversationsObserver);
+        this.mActiveFragment = fragment;
+    }
+
+    /**
+     * Unregister from conversations table
+     */
+    public void unregisterMmsMessages() {
+        mContext.getContentResolver().unregisterContentObserver(mConversationsObserver);
+        this.mActiveFragment = null;
     }
 }

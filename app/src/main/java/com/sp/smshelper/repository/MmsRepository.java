@@ -1,5 +1,7 @@
 package com.sp.smshelper.repository;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MmsRepository extends BaseRepository {
 
@@ -646,5 +649,33 @@ public class MmsRepository extends BaseRepository {
             Log.e(TAG, "Catch a SQLiteException when delete: ", e);
             return -1;
         }
+    }
+
+    /**
+     * Deletes Mms threads
+     *
+     * @param context   Activity context
+     * @param threadIds List of thread ids
+     * @return Content provider results
+     */
+    public ContentProviderResult[] deleteMmsThreads(Context context, List<String> threadIds) {
+        Log.d(TAG, "deleteMmsThreads()");
+
+        ContentProviderResult[] results = null;
+        String selection = Telephony.Mms.THREAD_ID + " = ?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            for (String threadId : threadIds) {
+                String[] selectionArgs = new String[]{threadId};
+                ops.add(ContentProviderOperation.newDelete(Telephony.Mms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs)
+                        .withYieldAllowed(true)
+                        .build());
+            }
+            results = context.getContentResolver().applyBatch(Objects.requireNonNull(Telephony.Mms.CONTENT_URI.getAuthority()), ops);
+        } catch (Exception e) {
+            Log.e(TAG, "deleteMmsThreads(): " + e);
+        }
+        return results;
     }
 }
