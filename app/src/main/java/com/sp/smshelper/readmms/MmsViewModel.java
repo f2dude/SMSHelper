@@ -274,6 +274,18 @@ public class MmsViewModel extends ViewModel {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    public Disposable markAllMessagesAsRead(String threadId) {
+        Log.d(TAG, "markAllMessagesAsRead()");
+
+        return Single.fromCallable(() -> {
+            MmsRepository mmsRepository = new MmsRepository();
+            return mmsRepository.markAllMessagesAsReadUsingThreadId(mContext, threadId);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(o -> Log.d(TAG, "markAllMessagesAsRead(), Rows updated: " + o));
+    }
+
     /**
      * Receives updates from {@link ConversationsObserver}
      */

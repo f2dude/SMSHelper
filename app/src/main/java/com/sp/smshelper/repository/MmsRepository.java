@@ -706,4 +706,32 @@ public class MmsRepository extends BaseRepository {
         }
         return results;
     }
+
+    /**
+     * Marks all messages as read using thread id
+     * Message of type INBOX and whose READ status is 0 are marked as read
+     *
+     * @param context  Activity context
+     * @param threadId Thread id
+     */
+    public int markAllMessagesAsReadUsingThreadId(Context context, String threadId) {
+        Log.d(TAG, "markMessagesAsReadUsingThreadId()");
+        int rowsUpdated = 0;
+        try {
+            String where = Telephony.Mms.THREAD_ID + " = ? AND "
+                    + Telephony.Mms.READ + " = ?";
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Mms.READ, 1);
+            contentValues.put(Telephony.Mms.SEEN, 1);
+
+            rowsUpdated = context.getContentResolver().update(Telephony.Mms.CONTENT_URI,
+                    contentValues,
+                    where,
+                    new String[]{threadId, "0"});
+
+        } catch (Exception e) {
+            Log.e(TAG, "markMessagesAsReadUsingThreadId: " + e);
+        }
+        return rowsUpdated;
+    }
 }

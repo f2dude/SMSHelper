@@ -97,7 +97,7 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.mark_all_read:
-
+                markAllAsRead();
                 return true;
             case R.id.select:
                 startActionMode((AppCompatActivity) getActivity(), R.menu.sms_messages_action_menu, getString(R.string.title_zero));
@@ -154,6 +154,10 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
             mAdapter.toggleSelection(position);
             mActionMode.setTitle(String.valueOf(mAdapter.getSelectedItemsSize()));
         }
+    }
+
+    private void markAllAsRead() {
+        addToCompositeDisposable(mViewModel.markAllMessagesAsRead(mThreadId));
     }
 
     @Override
