@@ -130,6 +130,57 @@ public class SendSmsViewModel extends ViewModel {
         mContext.unregisterReceiver(deliveredBr);
     }
 
+    private BroadcastReceiver sentBR = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "=====Sent broadcast receiver=====");
+            String status = translateSentResult(getResultCode());
+            mMutableMessageSent.setValue(status);
+
+            if (null != intent) {
+                String uri = intent.getStringExtra(MESSAGE_URI);
+                //Update sent status only when message sending fails
+                //Update two things. 1. Status & 2. Error code
+                if (!TextUtils.isEmpty(uri) && getResultCode() != Activity.RESULT_OK) {
+                    ConversationsRepository conversationsRepository = new ConversationsRepository();
+                    conversationsRepository.updateSentStatusOfSentMessage(mContext, Uri.parse(uri), Telephony.Sms.STATUS_FAILED, getResultCode());
+                }
+            }
+
+            Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
+        }
+
+        /**
+         * Translates status codes of SMS sent status
+         *
+         * @param resultCode SMS sent status result code
+         * @return Status of SMS message
+         */
+        private String translateSentResult(int resultCode) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    return "Sent";
+                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+                    return "RESULT_ERROR_GENERIC_FAILURE";
+                case SmsManager.RESULT_ERROR_RADIO_OFF:
+                    return "RESULT_ERROR_RADIO_OFF";
+                case SmsManager.RESULT_ERROR_NULL_PDU:
+                    return "RESULT_ERROR_NULL_PDU";
+                case SmsManager.RESULT_ERROR_NO_SERVICE:
+                    return "RESULT_ERROR_NO_SERVICE";
+                default:
+                    return "Unknown error code";
+            }
+        }
+    };
+
+    private Uri saveOutgoingSmsMessage(String address, String message) {
+        Log.d(TAG, "saveOutgoingSmsMessage()");
+        //Save outgoing SMS message
+        ConversationsRepository conversationsRepository = new ConversationsRepository();
+        return conversationsRepository.saveOutgoingSmsMessage(mContext, address, message, mSubscriptionId);
+    }
+
     /**
      * Method to send the message
      *
@@ -153,6 +204,7 @@ public class SendSmsViewModel extends ViewModel {
 
                 status = true;
                 Intent sentIntent = new Intent(SENT);
+                sentIntent.putExtra(MESSAGE_URI, uri.toString());
                 PendingIntent sentPi = PendingIntent.getBroadcast(mContext,
                         0,
                         sentIntent,
@@ -196,46 +248,6 @@ public class SendSmsViewModel extends ViewModel {
                         },
                         error -> Log.e(TAG, "Error in sendSMS(): " + error));
     }
-
-    private Uri saveOutgoingSmsMessage(String address, String message) {
-        Log.d(TAG, "saveOutgoingSmsMessage()");
-        //Save outgoing SMS message
-        ConversationsRepository conversationsRepository = new ConversationsRepository();
-        return conversationsRepository.saveOutgoingSmsMessage(mContext, address, message, mSubscriptionId);
-    }
-
-    private BroadcastReceiver sentBR = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "=====Sent broadcast receiver=====");
-            String status = translateSentResult(getResultCode());
-            mMutableMessageSent.setValue(status);
-            Toast.makeText(mContext, status, Toast.LENGTH_SHORT).show();
-        }
-
-        /**
-         * Translates status codes of SMS sent status
-         *
-         * @param resultCode SMS sent status result code
-         * @return Status of SMS message
-         */
-        private String translateSentResult(int resultCode) {
-            switch (resultCode) {
-                case Activity.RESULT_OK:
-                    return "Sent";
-                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-                    return "RESULT_ERROR_GENERIC_FAILURE";
-                case SmsManager.RESULT_ERROR_RADIO_OFF:
-                    return "RESULT_ERROR_RADIO_OFF";
-                case SmsManager.RESULT_ERROR_NULL_PDU:
-                    return "RESULT_ERROR_NULL_PDU";
-                case SmsManager.RESULT_ERROR_NO_SERVICE:
-                    return "RESULT_ERROR_NO_SERVICE";
-                default:
-                    return "Unknown error code";
-            }
-        }
-    };
 
     private BroadcastReceiver deliveredBr = new BroadcastReceiver() {
         @Override

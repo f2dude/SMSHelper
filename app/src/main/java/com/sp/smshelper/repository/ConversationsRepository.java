@@ -535,4 +535,29 @@ public class ConversationsRepository extends BaseRepository{
             Log.e(TAG, "Exception in updateDeliveryStatusOfSentMessage(): " + e);
         }
     }
+
+    /**
+     * Updates sent status of message
+     *
+     * @param context   Activity context
+     * @param uri       Table record uri
+     * @param status    Message sent status
+     * @param errorCode Error code
+     */
+    public void updateSentStatusOfSentMessage(Context context, Uri uri, int status, int errorCode) {
+        Log.d(TAG, "updateSentStatusOfSentMessage(), Uri: " + uri + " ,Status: " + status);
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Sms.STATUS, status);
+            contentValues.put(Telephony.Sms.ERROR_CODE, errorCode);
+
+            int rowsUpdated = context.getContentResolver().update(uri,
+                    contentValues,
+                    null,
+                    null);
+            Log.d(TAG, "Rows updated: " + rowsUpdated);
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in updateSentStatusOfSentMessage(): " + e);
+        }
+    }
 }
