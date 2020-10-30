@@ -734,4 +734,32 @@ public class MmsRepository extends BaseRepository {
         }
         return rowsUpdated;
     }
+
+    /**
+     * Marks a message as read
+     *
+     * @param context   Activity context
+     * @param messageId Message id
+     * @return Should return 1 as single row is updated
+     */
+    public int markMessageAsRead(Context context, String messageId) {
+        Log.d(TAG, "markMessageAsRead()");
+        int rowsUpdated = 0;
+        try {
+            String where = Telephony.Mms._ID + " = ? AND "
+                    + Telephony.Mms.READ + " = ?";
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Mms.READ, 1);
+            contentValues.put(Telephony.Mms.SEEN, 1);
+
+            rowsUpdated = context.getContentResolver().update(Telephony.Mms.CONTENT_URI,
+                    contentValues,
+                    where,
+                    new String[]{messageId, "0"});
+
+        } catch (Exception e) {
+            Log.e(TAG, "markMessageAsRead: " + e);
+        }
+        return rowsUpdated;
+    }
 }

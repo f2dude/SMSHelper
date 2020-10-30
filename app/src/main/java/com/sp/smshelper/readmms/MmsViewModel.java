@@ -274,6 +274,23 @@ public class MmsViewModel extends ViewModel {
                 .observeOn(AndroidSchedulers.mainThread());
     }
 
+    /**
+     * Delets MMS messages
+     *
+     * @param messageIdsList Message Ids list
+     * @return Operation results
+     */
+    public Single<ContentProviderResult[]> deleteMmsMessages(List<String> messageIdsList) {
+        Log.d(TAG, "deleteMmsMessages()");
+
+        return Single.fromCallable(() -> {
+            MmsRepository mmsRepository = new MmsRepository();
+            return mmsRepository.deleteMmsMessages(mContext, messageIdsList);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
+
     public Disposable markAllMessagesAsRead(String threadId) {
         Log.d(TAG, "markAllMessagesAsRead()");
 
@@ -284,6 +301,24 @@ public class MmsViewModel extends ViewModel {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(o -> Log.d(TAG, "markAllMessagesAsRead(), Rows updated: " + o));
+    }
+
+    public Disposable markMessageAsRead(String messageId) {
+        Log.d(TAG, "markMessageAsRead()");
+
+        return Single.fromCallable(() -> {
+            MmsRepository mmsRepository = new MmsRepository();
+            return mmsRepository.markMessageAsRead(mContext, messageId);
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(o -> {
+                    Log.d(TAG, "markMessageAsRead(), Rows updated: " + o);
+                    if (o > 0) {
+                        //Get the message details
+                        getMmsMessageByMessageId(messageId);
+                    }
+                });
     }
 
     /**
@@ -328,22 +363,5 @@ public class MmsViewModel extends ViewModel {
     public void unregisterMmsMessages() {
         mContext.getContentResolver().unregisterContentObserver(mConversationsObserver);
         this.mActiveFragment = null;
-    }
-
-    /**
-     * Delets MMS messages
-     *
-     * @param messageIdsList Message Ids list
-     * @return Operation results
-     */
-    public Single<ContentProviderResult[]> deleteMmsMessages(List<String> messageIdsList) {
-        Log.d(TAG, "deleteMmsMessages()");
-
-        return Single.fromCallable(() -> {
-            MmsRepository mmsRepository = new MmsRepository();
-            return mmsRepository.deleteMmsMessages(mContext, messageIdsList);
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
     }
 }

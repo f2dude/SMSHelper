@@ -7,4 +7,9 @@
         android:icon="@drawable/ic_image_white_24dp"
         android:title="@string/view_media"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/mark_as_read"
+        android:title="@string/mark_as_read"
+        app:showAsAction="collapseActionView" />
 </menu>
