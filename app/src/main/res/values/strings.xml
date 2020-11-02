@@ -36,4 +36,5 @@
     <string name="enter_subject">Enter subject</string>
     <string name="mms_sending_failed">MMS sending failed</string>
     <string name="add">Add</string>
+    <string name="attach_file">Attach file</string>
 </resources>

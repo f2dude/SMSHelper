@@ -15,6 +15,7 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
@@ -43,6 +44,7 @@ import com.sp.smshelper.smil_utils.SmilXmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,17 +128,27 @@ public class SendMmsViewModel extends ViewModel {
         this.mSubscriptionId = mSubscriptionId;
     }
 
-    Disposable sendMmsMessage(String address, String subject, String messageBody, int drawableResource) {
+    Disposable sendMmsMessage(String address, String subject, String messageBody, String filePath) {
 
         Log.d(TAG, "Address: " + address
                 + " , Subject: " + subject
                 + " , Message body: " + messageBody
-                + " , Drawable: " + drawableResource
+                + " , File path: " + filePath
                 + " ,Subscription id: " + mSubscriptionId);
 
         return Maybe.fromCallable(() -> {
             MmsSenderObject mmsSenderObject = new MmsSenderObject(messageBody, address);
-            mmsSenderObject.setImage(BitmapFactory.decodeResource(mContext.getResources(), drawableResource));
+            File file = new File(filePath);
+            String mimeType = getMimeType(filePath);
+            if (ContentType.isImageType(mimeType)) {//Image type
+                mmsSenderObject.setImage(BitmapFactory.decodeFile(filePath));
+            } else if (ContentType.isAudioType(mimeType)) {//Audio
+                mmsSenderObject.addAudio(convertToByteArray(file), file.getName());
+            } else if (ContentType.isVideoType(mimeType)) {//Video
+                mmsSenderObject.addVideo(convertToByteArray(file), file.getName());
+            } else {//Unspecified
+                mmsSenderObject.addMedia(convertToByteArray(file), mimeType, file.getName());
+            }
             mmsSenderObject.setSave(true);
             mmsSenderObject.setSubject(subject);
             return mmsSenderObject;
@@ -386,5 +398,37 @@ public class SendMmsViewModel extends ViewModel {
                 (message.getParts().size() != 0) ||
                 (message.getAddresses().length > 1) ||
                 message.getSubject() != null;
+    }
+
+    /**
+     * Fetches the mime type from file path.
+     * URL can also be used
+     *
+     * @param filePath
+     * @return Mime type of file
+     */
+    private String getMimeType(String filePath) {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
+
+    /**
+     * Converts file to byte array
+     *
+     * @param file file object
+     * @return Byte array
+     */
+    private byte[] convertToByteArray(File file) {
+        byte[] fileBytes = new byte[(int) file.length()];
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            inputStream.read(fileBytes);
+        } catch (Exception ex) {
+            Log.e(TAG, "Exception in convertUsingJavaNIO(): " + ex);
+        }
+        return fileBytes;
     }
 }

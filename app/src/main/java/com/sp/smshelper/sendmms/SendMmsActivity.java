@@ -1,10 +1,12 @@
 package com.sp.smshelper.sendmms;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +17,12 @@ import com.sp.smshelper.databinding.ActivitySendMmsBinding;
 import com.sp.smshelper.main.BaseActivity;
 import com.sp.smshelper.sendsms.NumbersAdapter;
 
+import java.io.File;
+import java.util.ArrayList;
+
+import droidninja.filepicker.FilePickerBuilder;
+import droidninja.filepicker.FilePickerConst;
+
 public class SendMmsActivity extends BaseActivity {
 
     private static final String TAG = SendMmsActivity.class.getSimpleName();
@@ -22,6 +30,7 @@ public class SendMmsActivity extends BaseActivity {
     private ActivitySendMmsBinding mBinding;
     private SendMmsViewModel mViewModel;
     private StringBuilder mSb = new StringBuilder();
+    private ArrayList<String> mFilePaths = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,8 +78,8 @@ public class SendMmsActivity extends BaseActivity {
             if (TextUtils.isEmpty(mSb.toString())) {
                 mSb.append(address);
             }
-            if (!TextUtils.isEmpty(mSb.toString().trim())) {
-                addToCompositeDisposable(mViewModel.sendMmsMessage(mSb.toString().trim(), subject, messageBody, R.drawable.android));
+            if (!TextUtils.isEmpty(mSb.toString().trim()) && mFilePaths.size() == 1) {
+                addToCompositeDisposable(mViewModel.sendMmsMessage(mSb.toString().trim(), subject, messageBody, mFilePaths.get(0)));
             }
         } else {
             Toast.makeText(this, getText(R.string.select_phone_number), Toast.LENGTH_SHORT).show();
@@ -84,5 +93,40 @@ public class SendMmsActivity extends BaseActivity {
 
         mBinding.addedNumbers.setText(mSb.toString().trim());
         mBinding.phoneNumber.setText("");
+    }
+
+    public void onAttachClicked() {
+        Log.d(TAG, "onAttachClicked");
+//        FilePickerBuilder.getInstance().setMaxCount(1)
+//                .setSelectedFiles(mFilePaths)
+//                .setActivityTheme(R.style.AppTheme)
+//                .pickPhoto(this);
+
+        FilePickerBuilder.getInstance().setMaxCount(1)
+                .setSelectedFiles(mFilePaths)
+                .setActivityTheme(R.style.AppTheme)
+                .pickDocument(this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case FilePickerConst.REQUEST_CODE:
+                if (resultCode == RESULT_OK && data != null) {
+                    mFilePaths.clear();
+                    mFilePaths = data.getStringArrayListExtra(FilePickerConst.KEY_SELECTED_PHOTOS);
+                    Log.d(TAG, "File paths: " + mFilePaths);
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < mFilePaths.size(); i++) {
+                        File file = new File(mFilePaths.get(i));
+                        sb.append(file.getName());
+                        if ((i + 1) < mFilePaths.size()) {
+                            sb.append("\n");
+                        }
+                    }
+                    mBinding.fileAttached.setText(sb.toString());
+                }
+        }
     }
 }
