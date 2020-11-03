@@ -409,7 +409,7 @@ public class SendMmsViewModel extends ViewModel {
      */
     private String getMimeType(String filePath) {
         String type = null;
-        String extension = MimeTypeMap.getFileExtensionFromUrl(filePath);
+        String extension = MimeTypeMap.getFileExtensionFromUrl(removeWhiteSpaces(filePath));
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
         }
@@ -430,5 +430,15 @@ public class SendMmsViewModel extends ViewModel {
             Log.e(TAG, "Exception in convertUsingJavaNIO(): " + ex);
         }
         return fileBytes;
+    }
+
+    /**
+     * Removes space characters present in the string
+     *
+     * @param name Name of the file
+     * @return Name of the file w/o space characters
+     */
+    private String removeWhiteSpaces(String name) {
+        return name.replaceAll("\\s+", "");
     }
 }
