@@ -3,9 +3,6 @@ package com.sp.smshelper.pdu_utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -325,7 +322,7 @@ public class Utils {
      *
      * @param telephonyManager the telephony manager
      */
-    public static boolean isDataEnabled(TelephonyManager telephonyManager) {
+    private static boolean isDataEnabled(TelephonyManager telephonyManager) {
         try {
             Class<?> c = telephonyManager.getClass();
             Method m = c.getMethod("getDataEnabled");
@@ -367,11 +364,12 @@ public class Utils {
 //        return address;
 //    }
 
-    /**
-     * Gets the default settings from a shared preferences file associated with your app
-     * @param context is the context of the activity or service
-     * @return the settings object to send with
-     */
+    //    /**
+//     * Gets the default settings from a shared preferences file associated with your app
+//     *
+//     * @param context is the context of the activity or service
+//     * @return the settings object to send with
+//     */
 //    public static Settings getDefaultSendSettings(Context context) {
 //        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 //        Settings sendSettings = new Settings();
@@ -393,29 +391,7 @@ public class Utils {
 //
 //        return sendSettings;
 //    }
-
     public static int getDefaultSubscriptionId() {
         return SmsManager.getDefaultSmsSubscriptionId();
-    }
-
-    /**
-     * Checks if the device connected to a cellular network
-     *
-     * @param context Activity context
-     * @return True if connected, false otherwise
-     */
-    public static boolean isDeviceConnectedToMobileNetwork(Context context) {
-        boolean isConnected = false;
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            Network[] allNetworks = connectivityManager.getAllNetworks();
-            for (Network network : allNetworks) {
-                NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(network);
-                if (networkCapabilities != null && networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
-                    isConnected = true;
-                }
-            }
-        }
-        return isConnected;
     }
 }

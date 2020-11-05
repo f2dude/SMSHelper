@@ -107,15 +107,15 @@ public class SendMmsActivity extends BaseActivity {
 
     public void onAttachClicked() {
         Log.d(TAG, "onAttachClicked");
-//        FilePickerBuilder.getInstance().setMaxCount(1)
-//                .setSelectedFiles(mFilePaths)
-//                .setActivityTheme(R.style.AppTheme)
-//                .pickPhoto(this);
-
         FilePickerBuilder.getInstance().setMaxCount(1)
                 .setSelectedFiles(mFilePaths)
                 .setActivityTheme(R.style.AppTheme)
-                .pickDocument(this);
+                .pickPhoto(this);
+
+//        FilePickerBuilder.getInstance().setMaxCount(1)
+//                .setSelectedFiles(mFilePaths)
+//                .setActivityTheme(R.style.AppTheme)
+//                .pickDocument(this);
     }
 
     @Override

@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Telephony;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -236,7 +237,7 @@ public class SendMmsViewModel extends ViewModel {
             }
             if (save) {
                 PduPersister persister = PduPersister.getPduPersister(context);
-                Uri messageUri = persister.persist(sendReq, Uri.parse("content://mms/outbox"),
+                Uri messageUri = persister.persist(sendReq, Telephony.Mms.Outbox.CONTENT_URI,
                         true, true, null, mSubscriptionId);
 
                 intent.putExtra(MmsSentReceiver.EXTRA_CONTENT_URI, messageUri.toString());

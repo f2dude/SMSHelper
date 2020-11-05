@@ -76,9 +76,6 @@ public class DownloadManager {
         String httpParams = MmsConfig.getHttpParams();
         if (!TextUtils.isEmpty(httpParams)) {
             configOverrides.putString(SmsManager.MMS_CONFIG_HTTP_PARAMS, httpParams);
-        } else {
-            // this doesn't seem to always work...
-            // configOverrides = smsManager.getCarrierConfigValues();
         }
 
         grantUriPermission(context, contentUri);

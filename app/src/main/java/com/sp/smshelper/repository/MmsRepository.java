@@ -581,8 +581,8 @@ public class MmsRepository extends BaseRepository {
      * @param sortOrder     Sort order
      * @return Cursor object
      */
-    public Cursor query(Context context, ContentResolver resolver, Uri uri,
-                        String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    Cursor query(Context context, ContentResolver resolver, Uri uri,
+                 String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         try {
             return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
         } catch (SQLiteException e) {
