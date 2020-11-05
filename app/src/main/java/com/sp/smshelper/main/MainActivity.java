@@ -63,7 +63,8 @@ public class MainActivity extends BaseActivity implements IMainActivity {
                 Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.RECEIVE_MMS,
                 Manifest.permission.RECEIVE_WAP_PUSH,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NETWORK_STATE
         };
 
         Disposable disposable = mViewModel.hasPermissions(this, SMS_PERMISSIONS_REQUEST_CODE, permissions)

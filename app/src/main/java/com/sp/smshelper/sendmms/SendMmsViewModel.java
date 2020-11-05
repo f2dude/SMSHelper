@@ -157,7 +157,7 @@ public class SendMmsViewModel extends ViewModel {
             if (null != mmsSenderObject && checkMMS(mmsSenderObject)) {
                 sendMmsMessage(mmsSenderObject.getText(), mmsSenderObject.getAddresses(),
                         mmsSenderObject.getImages(), mmsSenderObject.getImageNames(), mmsSenderObject.getParts(), mmsSenderObject.getSubject(),
-                        mmsSenderObject.getSave(), mmsSenderObject.getMessageUri());
+                        mmsSenderObject.getSave());
                 isSent = true;
             } else {
                 Log.e(TAG, "Not a MMS message");
@@ -175,7 +175,7 @@ public class SendMmsViewModel extends ViewModel {
     }
 
     private void sendMmsMessage(String text, String[] addresses, Bitmap[] image,
-                                String[] imageNames, List<MmsSenderObject.Part> parts, String subject, boolean save, Uri messageUri) {
+                                String[] imageNames, List<MmsSenderObject.Part> parts, String subject, boolean save) {
 
         // create the parts to send
         ArrayList<MMSPart> data = new ArrayList<>();
@@ -216,33 +216,16 @@ public class SendMmsViewModel extends ViewModel {
             data.add(part);
         }
 
-        sendMmsThroughSystem(mContext, subject, data, addresses, mExplicitSentMmsReceiver, save, messageUri);
+        sendMmsThroughSystem(mContext, subject, data, addresses, mExplicitSentMmsReceiver, save);
     }
 
     private void sendMmsThroughSystem(Context context, String subject, List<MMSPart> parts,
-                                      String[] addresses, Intent explicitSentMmsReceiver, boolean save, Uri existingMessageUri) {
+                                      String[] addresses, Intent explicitSentMmsReceiver, boolean save) {
         try {
             final String fileName = "send." + Math.abs(new Random().nextLong()) + ".dat";
             File mSendFile = new File(context.getCacheDir(), fileName);
 
             SendReq sendReq = buildPdu(context, addresses, subject, parts);
-            Uri messageUri = null;
-            if (save) {
-                PduPersister persister = PduPersister.getPduPersister(context);
-                messageUri = persister.persist(sendReq, Uri.parse("content://mms/outbox"),
-                        true, true, null, mSubscriptionId);
-            }
-            /*else {
-                messageUri = existingMessageUri;
-                Log.v(TAG, messageUri.toString());
-
-                // update message status to outbox in os database as we are trying to resend the same message
-                ContentValues values = new ContentValues(1);
-                values.put(Telephony.Mms.MESSAGE_BOX, Telephony.Mms.MESSAGE_BOX_OUTBOX);
-                int rowsUpdated = SqliteWrapper.update(context, context.getContentResolver(), messageUri, values,
-                        null, null);
-                Log.d(TAG, "rowsUpdated=" + rowsUpdated);
-            }*/
 
             Intent intent;
             if (explicitSentMmsReceiver == null) {
@@ -251,8 +234,13 @@ public class SendMmsViewModel extends ViewModel {
             } else {
                 intent = explicitSentMmsReceiver;
             }
+            if (save) {
+                PduPersister persister = PduPersister.getPduPersister(context);
+                Uri messageUri = persister.persist(sendReq, Uri.parse("content://mms/outbox"),
+                        true, true, null, mSubscriptionId);
 
-            intent.putExtra(MmsSentReceiver.EXTRA_CONTENT_URI, messageUri.toString());
+                intent.putExtra(MmsSentReceiver.EXTRA_CONTENT_URI, messageUri.toString());
+            }
             intent.putExtra(MmsSentReceiver.EXTRA_FILE_PATH, mSendFile.getPath());
             final PendingIntent pendingIntent = PendingIntent.getBroadcast(
                     context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -395,7 +383,7 @@ public class SendMmsViewModel extends ViewModel {
      */
     private boolean checkMMS(MmsSenderObject message) {
         return message.getImages().length != 0 ||
-                (message.getParts().size() != 0) ||
+                (!message.getParts().isEmpty()) ||
                 (message.getAddresses().length > 1) ||
                 message.getSubject() != null;
     }

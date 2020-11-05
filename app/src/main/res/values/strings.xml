@@ -37,4 +37,6 @@
     <string name="mms_sending_failed">MMS sending failed</string>
     <string name="add">Add</string>
     <string name="attach_file">Attach file</string>
+    <string name="mobile_internet_disabled">Mobile data connection is disabled</string>
+    <string name="enable_mobile_data">Please enable mobile data</string>
 </resources>
