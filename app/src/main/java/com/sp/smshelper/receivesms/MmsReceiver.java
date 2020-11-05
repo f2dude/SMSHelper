@@ -142,21 +142,8 @@ public class MmsReceiver extends BroadcastReceiver {
         try {
             PduPersister p = PduPersister.getPduPersister(context);
             if (!isDuplicateNotification(context, nInd)) {
-//                Uri uri = p.persist(pdu, Telephony.Mms.Inbox.CONTENT_URI,
-//                        true,
-//                        true,
-//                        null,
-//                        subscriptionId);
 
                 String contentLocation = p.getContentLocationFromPduHeader(pdu);
-//                try {
-//                    contentLocation = getContentLocation(context, uri);
-//                } catch (MmsException ex) {
-//                    contentLocation = p.getContentLocationFromPduHeader(pdu);
-//                    if (TextUtils.isEmpty(contentLocation)) {
-//                        throw ex;
-//                    }
-//                }
                 Log.d(TAG, "Content location: " + contentLocation);
 
                 DownloadManager.getInstance().downloadMultimediaMessage(context, contentLocation, null, true, subscriptionId);

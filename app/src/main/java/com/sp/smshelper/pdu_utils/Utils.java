@@ -3,7 +3,6 @@ package com.sp.smshelper.pdu_utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
@@ -12,6 +11,7 @@ import android.util.Log;
 
 import androidx.core.content.ContextCompat;
 
+import java.lang.reflect.Method;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -184,22 +184,6 @@ public class Utils {
 //        }
 //    }
 
-    /**
-     * Checks mobile data enabled based on telephonymanager
-     *
-     * @param telephonyManager the telephony manager
-     */
-//    public static boolean isDataEnabled(TelephonyManager telephonyManager) {
-//        try {
-//            Class<?> c = telephonyManager.getClass();
-//            Method m = c.getMethod("getDataEnabled");
-//            return (boolean) m.invoke(telephonyManager);
-//        } catch (Exception e) {
-//            Log.e(TAG, "exception thrown", e);
-//            return true;
-//        }
-//    }
-
 //    /**
 //     * Toggles mobile data
 //     *
@@ -322,16 +306,32 @@ public class Utils {
      * @param telephonyManager the telephony manager
      * @param subId            the sim card id
      */
-//    public static boolean isDataEnabled(TelephonyManager telephonyManager, int subId) {
-//        try {
-//            Class<?> c = telephonyManager.getClass();
-//            Method m = c.getMethod("getDataEnabled", int.class);
-//            return (boolean) m.invoke(telephonyManager, subId);
-//        } catch (Exception e) {
-//            Log.e(TAG, "exception thrown", e);
-//            return isDataEnabled(telephonyManager);
-//        }
-//    }
+    public static boolean isDataEnabled(TelephonyManager telephonyManager, int subId) {
+        try {
+            Class<?> c = telephonyManager.getClass();
+            Method m = c.getMethod("getDataEnabled", int.class);
+            return (boolean) m.invoke(telephonyManager, subId);
+        } catch (Exception e) {
+            Log.e(TAG, "exception thrown", e);
+            return isDataEnabled(telephonyManager);
+        }
+    }
+
+    /**
+     * Checks mobile data enabled based on telephonymanager
+     *
+     * @param telephonyManager the telephony manager
+     */
+    private static boolean isDataEnabled(TelephonyManager telephonyManager) {
+        try {
+            Class<?> c = telephonyManager.getClass();
+            Method m = c.getMethod("getDataEnabled");
+            return (boolean) m.invoke(telephonyManager);
+        } catch (Exception e) {
+            Log.e(TAG, "exception thrown", e);
+            return true;
+        }
+    }
 
 //    public static boolean doesThreadIdExist(Context context, long threadId) {
 //        Uri uri = Uri.parse("content://mms-sms/conversations/" + threadId + "/");
@@ -364,11 +364,12 @@ public class Utils {
 //        return address;
 //    }
 
-    /**
-     * Gets the default settings from a shared preferences file associated with your app
-     * @param context is the context of the activity or service
-     * @return the settings object to send with
-     */
+    //    /**
+//     * Gets the default settings from a shared preferences file associated with your app
+//     *
+//     * @param context is the context of the activity or service
+//     * @return the settings object to send with
+//     */
 //    public static Settings getDefaultSendSettings(Context context) {
 //        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
 //        Settings sendSettings = new Settings();
@@ -390,17 +391,6 @@ public class Utils {
 //
 //        return sendSettings;
 //    }
-
-    /**
-     * Determines whether or not the app has enabled MMS over WiFi
-     *
-     * @param context
-     * @return true if enabled
-     */
-    public static boolean isMmsOverWifiEnabled(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("mms_over_wifi", false);
-    }
-
     public static int getDefaultSubscriptionId() {
         return SmsManager.getDefaultSmsSubscriptionId();
     }

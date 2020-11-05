@@ -1,5 +1,7 @@
 package com.sp.smshelper.repository;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MmsRepository extends BaseRepository {
 
@@ -578,8 +581,8 @@ public class MmsRepository extends BaseRepository {
      * @param sortOrder     Sort order
      * @return Cursor object
      */
-    public Cursor query(Context context, ContentResolver resolver, Uri uri,
-                        String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    Cursor query(Context context, ContentResolver resolver, Uri uri,
+                 String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         try {
             return resolver.query(uri, projection, selection, selectionArgs, sortOrder);
         } catch (SQLiteException e) {
@@ -646,5 +649,117 @@ public class MmsRepository extends BaseRepository {
             Log.e(TAG, "Catch a SQLiteException when delete: ", e);
             return -1;
         }
+    }
+
+    /**
+     * Deletes Mms threads
+     *
+     * @param context   Activity context
+     * @param threadIds List of thread ids
+     * @return Content provider results
+     */
+    public ContentProviderResult[] deleteMmsThreads(Context context, List<String> threadIds) {
+        Log.d(TAG, "deleteMmsThreads()");
+
+        ContentProviderResult[] results = null;
+        String selection = Telephony.Mms.THREAD_ID + " = ?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            for (String threadId : threadIds) {
+                String[] selectionArgs = new String[]{threadId};
+                ops.add(ContentProviderOperation.newDelete(Telephony.Mms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs)
+                        .withYieldAllowed(true)
+                        .build());
+            }
+            results = context.getContentResolver().applyBatch(Objects.requireNonNull(Telephony.Mms.CONTENT_URI.getAuthority()), ops);
+        } catch (Exception e) {
+            Log.e(TAG, "deleteMmsThreads(): " + e);
+        }
+        return results;
+    }
+
+    /**
+     * Deletes mms messages
+     *
+     * @param context    Activity context
+     * @param messageIds List of message ids
+     * @return Content provider results
+     */
+    public ContentProviderResult[] deleteMmsMessages(Context context, List<String> messageIds) {
+        Log.d(TAG, "deleteMmsMessages()");
+
+        ContentProviderResult[] results = null;
+        String selection = Telephony.Mms._ID + " = ?";
+        ArrayList<ContentProviderOperation> ops = new ArrayList<>();
+        try {
+            for (String messageId : messageIds) {
+                String[] selectionArgs = new String[]{messageId};
+                ops.add(ContentProviderOperation.newDelete(Telephony.Mms.CONTENT_URI)
+                        .withSelection(selection, selectionArgs)
+                        .withYieldAllowed(true)
+                        .build());
+            }
+            results = context.getContentResolver().applyBatch(Objects.requireNonNull(Telephony.Mms.CONTENT_URI.getAuthority()), ops);
+        } catch (Exception e) {
+            Log.e(TAG, "deleteMmsMessages(): " + e);
+        }
+        return results;
+    }
+
+    /**
+     * Marks all messages as read using thread id
+     * Message of type INBOX and whose READ status is 0 are marked as read
+     *
+     * @param context  Activity context
+     * @param threadId Thread id
+     */
+    public int markAllMessagesAsReadUsingThreadId(Context context, String threadId) {
+        Log.d(TAG, "markMessagesAsReadUsingThreadId()");
+        int rowsUpdated = 0;
+        try {
+            String where = Telephony.Mms.THREAD_ID + " = ? AND "
+                    + Telephony.Mms.READ + " = ?";
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Mms.READ, 1);
+            contentValues.put(Telephony.Mms.SEEN, 1);
+
+            rowsUpdated = context.getContentResolver().update(Telephony.Mms.CONTENT_URI,
+                    contentValues,
+                    where,
+                    new String[]{threadId, "0"});
+
+        } catch (Exception e) {
+            Log.e(TAG, "markMessagesAsReadUsingThreadId: " + e);
+        }
+        return rowsUpdated;
+    }
+
+    /**
+     * Marks a message as read
+     *
+     * @param context   Activity context
+     * @param messageId Message id
+     * @return Should return 1 as single row is updated
+     */
+    public int markMessageAsRead(Context context, String messageId) {
+        Log.d(TAG, "markMessageAsRead()");
+        int rowsUpdated = 0;
+        try {
+            String where = Telephony.Mms._ID + " = ? AND "
+                    + Telephony.Mms.READ + " = ?";
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(Telephony.Mms.READ, 1);
+            contentValues.put(Telephony.Mms.SEEN, 1);
+
+            rowsUpdated = context.getContentResolver().update(Telephony.Mms.CONTENT_URI,
+                    contentValues,
+                    where,
+                    new String[]{messageId, "0"});
+
+        } catch (Exception e) {
+            Log.e(TAG, "markMessageAsRead: " + e);
+        }
+        return rowsUpdated;
     }
 }

@@ -1,13 +1,19 @@
 package com.sp.smshelper.mmsmessages;
 
+import android.content.ContentProviderResult;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,7 +27,12 @@ import com.sp.smshelper.readmms.MmsConversationActivity;
 import com.sp.smshelper.readmms.MmsViewModel;
 import com.sp.smshelper.views.SimpleDividerItemDecoration;
 
+import java.util.List;
 import java.util.Objects;
+
+import io.reactivex.rxjava3.core.SingleSource;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Function;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,6 +73,7 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
         super.onActivityCreated(savedInstanceState);
         //Set title
         Objects.requireNonNull(getActivity()).setTitle(R.string.mms_messages);
+        setHasOptionsMenu(true);
 
         mViewModel = ((MmsConversationActivity) getActivity()).getViewModel();
 
@@ -72,6 +84,42 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
             if (!TextUtils.isEmpty(mThreadId)) {
                 readMMSMessages();
             }
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.sms_messages, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mark_all_read:
+                markAllAsRead();
+                return true;
+            case R.id.select:
+                startActionMode((AppCompatActivity) getActivity(), R.menu.sms_messages_action_menu, getString(R.string.title_zero));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected boolean onActionItemClick(int itemId) {
+        super.onActionItemClick(itemId);
+        switch (itemId) {
+            case R.id.contextItemDelete:
+                Disposable disposable = mAdapter.getSelectedMessagesIds()
+                        .flatMap((Function<List<String>, SingleSource<ContentProviderResult[]>>) strings -> mViewModel.deleteMmsMessages(strings))
+                        .subscribe(results -> Log.d(TAG, "Messages deleted: " + results.length));
+                addToCompositeDisposable(disposable);
+                return true;
+            default:
+                mAdapter.clearSelections();
+                return false;
         }
     }
 
@@ -100,6 +148,38 @@ public class MmsMessagesFragment extends BaseFragment implements IListener.IMmsM
     @Override
     public void onMmsMessageItemClick(String messageId, int position) {
         Log.d(TAG, "onMmsMessageItemClick(), Position: " + position);
-        ((MmsConversationActivity) Objects.requireNonNull(getActivity())).startMmsDetailsFragment(messageId);
+        if (mActionMode == null) {
+            ((MmsConversationActivity) Objects.requireNonNull(getActivity())).startMmsDetailsFragment(messageId);
+        } else {
+            mAdapter.toggleSelection(position);
+            mActionMode.setTitle(String.valueOf(mAdapter.getSelectedItemsSize()));
+        }
+    }
+
+    private void markAllAsRead() {
+        addToCompositeDisposable(mViewModel.markAllMessagesAsRead(mThreadId));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart()");
+        //register observer
+        mViewModel.registerMmsMessages(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop()");
+        //Unregister observer
+        mViewModel.unregisterMmsMessages();
+    }
+
+    /**
+     * Returns the thread id
+     */
+    public String getThreadId() {
+        return mThreadId;
     }
 }

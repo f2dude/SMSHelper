@@ -2,6 +2,7 @@ package com.sp.smshelper.mmsmessages;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -79,6 +80,9 @@ public class MmsDetailsFragment extends BaseFragment {
             case R.id.viewImages:
                 ((MmsConversationActivity) getActivity()).startMmsMediaFragment(mMessageId);
                 break;
+            case R.id.mark_as_read:
+                markAsRead();
+                break;
             default:
                 break;
         }
@@ -92,5 +96,10 @@ public class MmsDetailsFragment extends BaseFragment {
         addToCompositeDisposable(mViewModel.getMmsMessageByMessageId(mMessageId));
         //Observe on data
         mViewModel.watchMmsMessageDetails().observe(getViewLifecycleOwner(), mmsMessage -> mBinding.mmsMessage.setText(mmsMessage));
+    }
+
+    private void markAsRead() {
+        Log.d(TAG, "markAsRead()");
+        addToCompositeDisposable(mViewModel.markMessageAsRead(mMessageId));
     }
 }

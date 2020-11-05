@@ -68,18 +68,6 @@ public class PduPersister {
      */
     public static final String TEMPORARY_DRM_OBJECT_URI =
             "content://mms/" + Long.MAX_VALUE + "/part";
-    /**
-     * Indicate that we transiently failed to process a MM.
-     */
-    public static final int PROC_STATUS_TRANSIENT_FAILURE = 1;
-    /**
-     * Indicate that we permanently failed to process a MM.
-     */
-    public static final int PROC_STATUS_PERMANENTLY_FAILURE = 2;
-    /**
-     * Indicate that we have successfully processed a MM.
-     */
-    public static final int PROC_STATUS_COMPLETED = 3;
     private static final String TAG = "PduPersister";
     private static final boolean DEBUG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -1285,8 +1273,8 @@ public class PduPersister {
      * @return A Uri which can be used to access the stored PDU.
      */
 
-    private Uri persist(GenericPdu pdu, Uri uri, boolean createThreadId, boolean groupMmsEnabled,
-                        HashMap<Uri, InputStream> preOpenedFiles, int subscriptionId)
+    public Uri persist(GenericPdu pdu, Uri uri, boolean createThreadId, boolean groupMmsEnabled,
+                       HashMap<Uri, InputStream> preOpenedFiles, int subscriptionId)
             throws MmsException {
         if (uri == null) {
             throw new MmsException("Uri may not be null.");
@@ -1655,7 +1643,7 @@ public class PduPersister {
                 return null;
             }
             final RetrieveConf retrieveConf = (RetrieveConf) pdu;
-            final int status = retrieveConf.getRetrieveStatus();
+//            final int status = retrieveConf.getRetrieveStatus();
 //            if (status != PduHeaders.RETRIEVE_STATUS_OK) {
 //                Log.e(TAG, "DownloadRequest.persistIfRequired: retrieve failed "
 //                        + status);

@@ -65,22 +65,10 @@ public class MmsReceivedReceiver extends BroadcastReceiver {
                         subscriptionId, null);
                 Log.d(TAG, "New MMS inserted uri: " + messageUri);
 
-//                List<CommonAsyncTask> tasks = getNotificationTask(context, intent, response);
-//
-//                messageUri = DownloadRequest.persist(context, response,
-//                        new MmsConfig.Overridden(new MmsConfig(context), null),
-//                        intent.getStringExtra(EXTRA_LOCATION_URL),
-//                        subscriptionId, null);
-
                 Log.d(TAG, "response saved successfully");
                 Log.d(TAG, "response length: " + response.length);
                 mDownloadFile.delete();
 
-//                if (tasks != null) {
-//                    Log.v(TAG, "running the common async notifier for download");
-//                    for (CommonAsyncTask task : tasks)
-//                        task.executeOnExecutor(RECEIVE_NOTIFICATION_EXECUTOR);
-//                }
             } catch (FileNotFoundException e) {
                 Log.e(TAG, "MMS received, file not found exception: " + e);
             } catch (IOException e) {

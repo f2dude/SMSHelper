@@ -22,6 +22,7 @@ import com.sp.smshelper.R;
 import com.sp.smshelper.conversation.ConversationsActivity;
 import com.sp.smshelper.databinding.ActivityMainBinding;
 import com.sp.smshelper.readmms.MmsConversationActivity;
+import com.sp.smshelper.sendmms.SendMmsActivity;
 import com.sp.smshelper.sendsms.SendSmsActivity;
 
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -62,7 +63,8 @@ public class MainActivity extends BaseActivity implements IMainActivity {
                 Manifest.permission.RECEIVE_SMS,
                 Manifest.permission.RECEIVE_MMS,
                 Manifest.permission.RECEIVE_WAP_PUSH,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.ACCESS_NETWORK_STATE
         };
 
         Disposable disposable = mViewModel.hasPermissions(this, SMS_PERMISSIONS_REQUEST_CODE, permissions)
@@ -110,6 +112,7 @@ public class MainActivity extends BaseActivity implements IMainActivity {
     @Override
     public void sendMms() {
         Log.d(TAG, "sendMms()");
+        startActivity(new Intent(this, SendMmsActivity.class));
     }
 
     /**

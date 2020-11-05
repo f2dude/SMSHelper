@@ -77,7 +77,8 @@ public class ConversationsObserver extends ContentObserver {
     }
 
     private boolean isUriPresent(Uri uri) {
-        if (Objects.requireNonNull(uri.getHost()).equals(Objects.requireNonNull(Telephony.Sms.CONTENT_URI.getHost()))) {
+        if (Objects.requireNonNull(uri.getHost()).equals(Objects.requireNonNull(Telephony.Sms.CONTENT_URI.getHost())) ||
+                Objects.requireNonNull(uri.getHost()).equals(Objects.requireNonNull(Telephony.Mms.CONTENT_URI.getHost()))) {
             Log.d(TAG, "=====URI matched=====" + uri.getHost());
             return true;
         }
