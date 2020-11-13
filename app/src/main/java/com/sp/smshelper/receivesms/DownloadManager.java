@@ -26,6 +26,7 @@ public class DownloadManager {
     private static final String TAG = "DownloadManager";
     private static final ConcurrentHashMap<String, MmsDownloadReceiver> mMap = new ConcurrentHashMap<>();
     private static DownloadManager ourInstance = new DownloadManager();
+    private static final String PROVIDER_PATH = ".provider.MmsFileProvider";
 
     private DownloadManager() {
 
@@ -57,7 +58,7 @@ public class DownloadManager {
         final String fileName = "download." + Math.abs(new Random().nextLong()) + ".dat";
         File mDownloadFile = new File(context.getCacheDir(), fileName);
         Uri contentUri = (new Uri.Builder())
-                .authority(context.getPackageName() + ".provider.MmsFileProvider")
+                .authority(context.getPackageName() + PROVIDER_PATH)
                 .path(fileName)
                 .scheme(ContentResolver.SCHEME_CONTENT)
                 .build();
@@ -83,7 +84,7 @@ public class DownloadManager {
     }
 
     private void grantUriPermission(Context context, Uri contentUri) {
-        context.grantUriPermission(context.getPackageName() + ".provider.MmsFileProvider",
+        context.grantUriPermission(context.getPackageName() + PROVIDER_PATH,
                 contentUri,
                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
     }
