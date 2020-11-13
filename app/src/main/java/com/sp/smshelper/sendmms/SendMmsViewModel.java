@@ -40,10 +40,7 @@ import com.sp.smshelper.pdu_utils.SendReq;
 import com.sp.smshelper.receivesms.MmsSentReceiver;
 import com.sp.smshelper.repository.BroadcastUtils;
 import com.sp.smshelper.repository.PduPersister;
-import com.sp.smshelper.smil_utils.SmilHelper;
-import com.sp.smshelper.smil_utils.SmilXmlSerializer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -71,6 +68,21 @@ public class SendMmsViewModel extends ViewModel {
     private int mSubscriptionId = -1;
 
     private MutableLiveData<List<SubscriptionInfo>> mMutableSimCardsList = new MutableLiveData<>();
+    private static final String SMIL_TEXT_PART_FILENAME = "text_0.txt";
+    private static final String SMIL_TEXT =
+            "<smil>" +
+                    "<head>" +
+                    "<layout>" +
+                    "<root-layout/>" +
+                    "<region height=\"100%%\" id=\"Text\" left=\"0%%\" top=\"0%%\" width=\"100%%\"/>" +
+                    "</layout>" +
+                    "</head>" +
+                    "<body>" +
+                    "<par dur=\"8000ms\">" +
+                    "<text src=\"%s\" region=\"Text\"/>" +
+                    "</par>" +
+                    "</body>" +
+                    "</smil>";
 
     void setContext(Context context) {
         this.mContext = context;
@@ -316,15 +328,17 @@ public class SendMmsViewModel extends ViewModel {
             MMSPart part = parts.get(i);
             size += addTextPart(body, part);
         }
+        //NOTE: BELOW 2 LINE OF CODE ARE COMMITTED SO, ENTIRE CLASSES FROM smil_utils PACKAGE IS NOT REQUIRED
 
         // add a SMIL document for compatibility
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        SmilXmlSerializer.serialize(SmilHelper.createSmilDocument(body), out);
+//        ByteArrayOutputStream out = new ByteArrayOutputStream();
+//        SmilXmlSerializer.serialize(SmilHelper.createSmilDocument(body), out);
+        final String smil = String.format(SMIL_TEXT, SMIL_TEXT_PART_FILENAME);
         PduPart smilPart = new PduPart();
         smilPart.setContentId("smil".getBytes());
         smilPart.setContentLocation("smil.xml".getBytes());
         smilPart.setContentType(ContentType.APP_SMIL.getBytes());
-        smilPart.setData(out.toByteArray());
+        smilPart.setData(smil.getBytes());
         body.addPart(0, smilPart);
 
         req.setBody(body);

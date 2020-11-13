@@ -652,6 +652,23 @@ public class MmsRepository extends BaseRepository {
     }
 
     /**
+     * Carries out delete operation based on message type and content location
+     *
+     * @param context       Activity context
+     * @param selectionArgs Selection values
+     * @return Number of deleted records
+     */
+    public int deleteMmsByTypeAndContentLocation(Context context, String[] selectionArgs) {
+        String where = Telephony.Mms.MESSAGE_TYPE + "=? AND " + Telephony.Mms.CONTENT_LOCATION + " =?";
+        try {
+            return context.getContentResolver().delete(Telephony.Mms.CONTENT_URI, where, selectionArgs);
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Catch a SQLiteException when delete: ", e);
+            return -1;
+        }
+    }
+
+    /**
      * Deletes Mms threads
      *
      * @param context   Activity context

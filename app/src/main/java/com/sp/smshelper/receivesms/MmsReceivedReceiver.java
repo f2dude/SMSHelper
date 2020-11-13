@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.provider.Telephony;
 import android.telephony.SmsManager;
 import android.util.Log;
 
@@ -112,20 +111,16 @@ public class MmsReceivedReceiver extends BroadcastReceiver {
     }
 
     private void handleHttpError(Context context, Intent intent) {
-        String locationSelection =
-                Telephony.Mms.MESSAGE_TYPE + "=? AND " + Telephony.Mms.CONTENT_LOCATION + " =?";
         final int httpError = intent.getIntExtra(SmsManager.EXTRA_MMS_HTTP_STATUS, 0);
         if (httpError == 404 || httpError == 400) {
             // Delete the corresponding NotificationInd
             MmsRepository mmsRepository = new MmsRepository();
-            mmsRepository.delete(context,
-                    context.getContentResolver(),
-                    Telephony.Mms.CONTENT_URI,
-                    locationSelection,
+            int deletedRecords = mmsRepository.deleteMmsByTypeAndContentLocation(context,
                     new String[]{
                             Integer.toString(PduHeaders.MESSAGE_TYPE_NOTIFICATION_IND),
                             intent.getStringExtra(EXTRA_LOCATION_URL)
                     });
+            Log.d(TAG, "handleHttpError(), Deleted records: " + deletedRecords);
         }
     }
 }
