@@ -462,6 +462,12 @@ public class MmsRepository extends BaseRepository {
                         data.setText(getValue(cursor, Telephony.Mms.Part.TEXT));
 
                         dataList.add(data);
+                    } else if (!ContentType.APP_SMIL.equalsIgnoreCase(contentType)) {
+                        data = new BaseModel().new Data();
+                        data.setContentType(contentType);
+                        data.setPartId(getValue(cursor, Telephony.Mms.Part._ID));
+
+                        dataList.add(data);
                     }
                 }
             }

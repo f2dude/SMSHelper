@@ -2,11 +2,14 @@ package com.sp.smshelper.model;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.databinding.BindingAdapter;
 
 import com.bumptech.glide.Glide;
+import com.sp.smshelper.R;
+import com.sp.smshelper.pdu_utils.ContentType;
 import com.sp.smshelper.repository.MmsRepository;
 
 public class MmsMessage extends BaseModel {
@@ -276,17 +279,23 @@ public class MmsMessage extends BaseModel {
         return !TextUtils.isEmpty(sb.toString()) ? sb.toString() : "From: Self";
     }
 
-    @BindingAdapter("mmsImage")
-    public static void loadImage(ImageView imageView, String partId) {
+    @BindingAdapter({"partId", "contentType"})
+    public static void loadImage(ImageView imageView, String partId, String contentType) {
         if (!TextUtils.isEmpty(partId)) {
             try {
-                MmsRepository mmsRepository = new MmsRepository();
-                Glide.with(imageView.getContext())
-                        .load(mmsRepository.extractImage(imageView.getContext(), partId))
-                        .into(imageView);
+                if (ContentType.isImageType(contentType)) {
+                    MmsRepository mmsRepository = new MmsRepository();
+                    Glide.with(imageView.getContext())
+                            .load(mmsRepository.extractImage(imageView.getContext(), partId))
+                            .into(imageView);
+                } else {
+                    imageView.setImageResource(R.drawable.attachment);
+                }
             } catch (Exception e) {
                 Log.e("MmsMessage", "Exception in loadImage(): " + e);
             }
+        } else {
+            imageView.setVisibility(View.GONE);
         }
     }
 }
