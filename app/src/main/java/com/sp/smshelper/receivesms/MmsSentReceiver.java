@@ -34,11 +34,13 @@ public class MmsSentReceiver extends BroadcastReceiver {
         Observable.fromAction(() -> {
             Uri uri = Uri.parse(intent.getStringExtra(EXTRA_CONTENT_URI));
             Log.d(TAG, uri.toString());
-
-            ContentValues values = new ContentValues(1);
-            values.put(Telephony.Mms.MESSAGE_BOX, Telephony.Mms.MESSAGE_BOX_SENT);
-
             MmsRepository mmsRepository = new MmsRepository();
+            ContentValues values = new ContentValues(1);
+            if (intent.getAction().equals(MMS_SENT)) {
+                values.put(Telephony.Mms.MESSAGE_BOX, Telephony.Mms.MESSAGE_BOX_SENT);
+            } else {
+                values.put(Telephony.Mms.MESSAGE_BOX, Telephony.Mms.MESSAGE_BOX_FAILED);
+            }
             mmsRepository.update(context, context.getContentResolver(), uri, values,
                     null, null);
 
