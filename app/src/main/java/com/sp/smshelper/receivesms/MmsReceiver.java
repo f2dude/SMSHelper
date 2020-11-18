@@ -104,8 +104,9 @@ public class MmsReceiver extends BroadcastReceiver {
         try {
             switch (type) {
                 case MESSAGE_TYPE_DELIVERY_IND:
+                    Log.d(TAG, "Received delivery report");
                 case MESSAGE_TYPE_READ_ORIG_IND:
-                    // TODO Pending implementation
+                    Log.d(TAG, "Received read report");
                     break;
                 case MESSAGE_TYPE_NOTIFICATION_IND:
                     Log.d(TAG, "MESSAGE_TYPE_NOTIFICATION_IND");
