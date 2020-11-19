@@ -14,6 +14,7 @@ import android.provider.Telephony;
 import android.telephony.SmsManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
@@ -37,6 +38,7 @@ import com.sp.smshelper.pdu_utils.PduComposer;
 import com.sp.smshelper.pdu_utils.PduHeaders;
 import com.sp.smshelper.pdu_utils.PduPart;
 import com.sp.smshelper.pdu_utils.SendReq;
+import com.sp.smshelper.pdu_utils.Utils;
 import com.sp.smshelper.receivesms.MmsSentReceiver;
 import com.sp.smshelper.repository.BroadcastUtils;
 import com.sp.smshelper.repository.PduPersister;
@@ -443,5 +445,35 @@ public class SendMmsViewModel extends ViewModel {
      */
     private String removeWhiteSpaces(String name) {
         return name.replaceAll("\\s+", "");
+    }
+
+    /**
+     * Checks whether the cellular nework is available or not
+     *
+     * @param context Activity context
+     * @return True if available, False otherwise
+     */
+    boolean isCellularAvailable(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        String operatorName = telephonyManager.getNetworkOperatorName();
+        Log.d(TAG, "#### isCellularAvailable(): NetworkOperatorName is: " + operatorName);
+        if (operatorName.compareTo("") == 0) {
+            Log.d(TAG, "#### isCellularAvailable(): NOPE");
+            return false;
+        } else {
+            Log.d(TAG, "#### isCellularAvailable(): YES!");
+            return true;
+        }
+    }
+
+    /**
+     * Checks if the mobile data is enabled or not
+     *
+     * @param context Activity context
+     * @return True if available, False otherwise
+     */
+    public boolean isMobileDataEnabled(Context context) {
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        return Utils.isDataEnabled(telephonyManager, getSubscriptionId());
     }
 }

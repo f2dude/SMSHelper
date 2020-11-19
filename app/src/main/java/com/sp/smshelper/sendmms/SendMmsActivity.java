@@ -1,9 +1,7 @@
 package com.sp.smshelper.sendmms;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.sp.smshelper.R;
 import com.sp.smshelper.databinding.ActivitySendMmsBinding;
 import com.sp.smshelper.main.BaseActivity;
-import com.sp.smshelper.pdu_utils.Utils;
 import com.sp.smshelper.sendsms.NumbersAdapter;
 
 import java.io.File;
@@ -75,21 +72,22 @@ public class SendMmsActivity extends BaseActivity {
     public void onSendClicked() {
         Log.d(TAG, "onSendClicked()");
         if (mViewModel.getSubscriptionId() > -1) {
-            TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-            boolean isMobileDataEnabled = Utils.isDataEnabled(telephonyManager, mViewModel.getSubscriptionId());
-            Log.d(TAG, "Is mobile data enabled: " + isMobileDataEnabled);
-            if (isMobileDataEnabled) {
-                String address = mBinding.phoneNumber.getText().toString().trim();
-                String subject = mBinding.subject.getText().toString().trim();
-                String messageBody = mBinding.mmsBody.getText().toString().trim();
-                if (TextUtils.isEmpty(mSb.toString())) {
-                    mSb.append(address);
-                }
-                if (!TextUtils.isEmpty(mSb.toString().trim()) && mFilePaths.size() == 1) {
-                    addToCompositeDisposable(mViewModel.sendMmsMessage(mSb.toString().trim(), subject, messageBody, mFilePaths.get(0)));
-                }
-            } else {
+            if (!mViewModel.isCellularAvailable(this)) {
+                Toast.makeText(this, getString(R.string.not_connected_to_network), Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (!mViewModel.isMobileDataEnabled(this)) {
                 Toast.makeText(this, getString(R.string.enable_mobile_data), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String address = mBinding.phoneNumber.getText().toString().trim();
+            String subject = mBinding.subject.getText().toString().trim();
+            String messageBody = mBinding.mmsBody.getText().toString().trim();
+            if (TextUtils.isEmpty(mSb.toString())) {
+                mSb.append(address);
+            }
+            if (!TextUtils.isEmpty(mSb.toString().trim()) && mFilePaths.size() == 1) {
+                addToCompositeDisposable(mViewModel.sendMmsMessage(mSb.toString().trim(), subject, messageBody, mFilePaths.get(0)));
             }
         } else {
             Toast.makeText(this, getText(R.string.select_phone_number), Toast.LENGTH_SHORT).show();
@@ -107,15 +105,15 @@ public class SendMmsActivity extends BaseActivity {
 
     public void onAttachClicked() {
         Log.d(TAG, "onAttachClicked");
-//        FilePickerBuilder.getInstance().setMaxCount(1)
-//                .setSelectedFiles(mFilePaths)
-//                .setActivityTheme(R.style.AppTheme)
-//                .pickPhoto(this);
-
         FilePickerBuilder.getInstance().setMaxCount(1)
                 .setSelectedFiles(mFilePaths)
                 .setActivityTheme(R.style.AppTheme)
-                .pickDocument(this);
+                .pickPhoto(this);
+
+//        FilePickerBuilder.getInstance().setMaxCount(1)
+//                .setSelectedFiles(mFilePaths)
+//                .setActivityTheme(R.style.AppTheme)
+//                .pickDocument(this);
     }
 
     @Override

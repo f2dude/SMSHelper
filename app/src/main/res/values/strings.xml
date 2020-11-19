@@ -39,4 +39,5 @@
     <string name="attach_file">Attach file</string>
     <string name="mobile_internet_disabled">Mobile data connection is disabled</string>
     <string name="enable_mobile_data">Please enable mobile data</string>
+    <string name="not_connected_to_network">Unable to send this message. Your device is not connected to a mobile network.</string>
 </resources>
