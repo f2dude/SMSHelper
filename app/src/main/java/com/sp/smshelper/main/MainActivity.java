@@ -25,7 +25,10 @@ import com.sp.smshelper.readmms.MmsConversationActivity;
 import com.sp.smshelper.sendmms.SendMmsActivity;
 import com.sp.smshelper.sendsms.SendSmsActivity;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity implements IMainActivity {
 
@@ -121,9 +124,11 @@ public class MainActivity extends BaseActivity implements IMainActivity {
     @Override
     public void clearDefaults() {
         Disposable disposable = mViewModel.checkDefaultApp(this)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aBoolean -> {
                     if (aBoolean) {
-                        mViewModel.changeComponentSetting(this, PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
+                        mViewModel.changeComponentSetting(this, false);
                     }
                 });
         addToCompositeDisposable(disposable);
@@ -133,7 +138,18 @@ public class MainActivity extends BaseActivity implements IMainActivity {
      * Requests for default app
      */
     private void requestDefaultApp() {
-        Disposable disposable = mViewModel.checkDefaultApp(this)
+        Disposable disposable = mViewModel.checkComponentState(this)
+                .flatMap(aBoolean -> {
+                    if (aBoolean) {
+                        return mViewModel.checkDefaultApp(this);
+                    }
+                    //Once application component is disabled, we call the below method
+                    //The below method is called until the component is enabled
+                    mViewModel.changeComponentSetting(this, true);
+                    return Single.just(true);
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aBoolean -> {
                     if (!aBoolean) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

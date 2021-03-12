@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.provider.Telephony;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
@@ -24,7 +25,8 @@ public class MainActivityViewModel extends ViewModel {
 
     /**
      * Checks whether the permissions are approved
-     * @param context activity context
+     *
+     * @param context     activity context
      * @param requestCode Request code
      * @param permissions Permission type
      * @return true/false
@@ -48,13 +50,13 @@ public class MainActivityViewModel extends ViewModel {
 
     /**
      * Checks for default app
+     *
      * @param context Activity context
      * @return true/false
      */
     Single<Boolean> checkDefaultApp(Context context) {
         Log.d(TAG, "checkDefaultApp()");
         return Single.fromCallable(() -> {
-            checkComponentEnabledSetting(context);
 
             String defaultPackage = Telephony.Sms.getDefaultSmsPackage(context);
             Log.d(TAG, "Default sms package: " + defaultPackage);
@@ -62,34 +64,42 @@ public class MainActivityViewModel extends ViewModel {
             Log.d(TAG, "App package name:" + appPackageName);
 
             return appPackageName.equals(defaultPackage);
-        })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+        });
     }
 
     /**
-     * Checks the setting of component
+     * Checks the Component setting
      *
      * @param context Activity context
+     * @return true if component is enabled or false otherwise
      */
-    private void checkComponentEnabledSetting(Context context) {
-        int isStateDisabled = context.getPackageManager().getComponentEnabledSetting(new ComponentName(context, SmsReceiver.class));
-        if (isStateDisabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
-            changeComponentSetting(context, PackageManager.COMPONENT_ENABLED_STATE_ENABLED);
-            Log.d(TAG, "Enabled SMSReceiver component");
-        }
+    Single<Boolean> checkComponentState(Context context) {
+        return Single.fromCallable(() -> {
+            int state = context.getPackageManager().getComponentEnabledSetting(new ComponentName(context, SmsReceiver.class));
+            return state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                    || state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+        });
     }
 
     /**
      * Changes the setting of component
      *
      * @param context Activity context
-     * @param setting Setting to set
+     * @param state   true to enable component, false to disable the component
      */
-    void changeComponentSetting(Context context, int setting) {
-        context.getPackageManager()
-                .setComponentEnabledSetting(new ComponentName(context, SmsReceiver.class),
-                        setting,
-                        PackageManager.DONT_KILL_APP);
+    void changeComponentSetting(Context context, boolean state) {
+        String defaultSmsPackage = Telephony.Sms.getDefaultSmsPackage(context);//before component state change
+        //When default sms package name is not null, then only enable the component or else don't
+        if (!TextUtils.isEmpty(defaultSmsPackage)) {
+            Log.d(TAG, "Component state changed!");
+            context.getPackageManager()
+                    .setComponentEnabledSetting(new ComponentName(context, SmsReceiver.class),
+                            state ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                            PackageManager.DONT_KILL_APP);
+        } else {
+            Log.d(TAG, "Component state cannot be changed!");
+        }
+        defaultSmsPackage = Telephony.Sms.getDefaultSmsPackage(context);//after component state change
+        Log.d(TAG, "Component disabled! Default app package name is: " + defaultSmsPackage);
     }
 }
